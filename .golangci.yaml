@@ -1,0 +1,19 @@
+run:
+  deadline: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable-all: true
+  disable:
+    - nolintlint
+    - scopelint # deprecated
+    - golint # deprecated
+    - maligned # deprecated
+    - interfacer # deprecated
+    - lll
+    - gomnd
+    - varnamelen
+    - gochecknoglobals
+    - cyclop
+    - funlen
