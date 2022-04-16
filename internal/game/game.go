@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -35,6 +36,9 @@ var (
 	sprites     map[SpriteName]*Sprite
 	spriteSheet *ebiten.Image
 	done        bool
+	steps       int
+	stage       = 1
+	room        = 1
 )
 
 type Game struct{}
@@ -68,6 +72,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	player.Draw(screen)
 
+	// HUD
+
+	DrawText(screen, 2*characterWidth, 200, "STEP", false)
+	DrawText(screen, 12*characterWidth, 200, strconv.Itoa(steps), true)
+
+	DrawText(screen, 16*characterWidth, 200, "STAGE", false)
+	DrawText(screen, 24*characterWidth, 200, strconv.Itoa(stage), true)
+
+	DrawText(screen, 28*characterWidth, 200, "ROOM", false)
+	DrawText(screen, 36*characterWidth, 200, strconv.Itoa(room), true)
+
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("%t", done))
 }
 
@@ -88,67 +103,67 @@ func New() (*Game, error) {
 	sprites = map[SpriteName]*Sprite{
 		SpriteIdle: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 1},
+				{IndexX: 1, IndexY: 3},
 			},
 			1,
 		),
 		SpriteWalking: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 1},
-				{IndexX: 1, IndexY: 1},
-				{IndexX: 2, IndexY: 1},
-				{IndexX: 1, IndexY: 1},
+				{IndexX: 0, IndexY: 3},
+				{IndexX: 1, IndexY: 3},
+				{IndexX: 2, IndexY: 3},
+				{IndexX: 1, IndexY: 3},
 			},
 			10,
 		),
 		SpritePushing: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 2},
-				{IndexX: 1, IndexY: 2},
-				{IndexX: 2, IndexY: 2},
-				{IndexX: 1, IndexY: 2},
+				{IndexX: 0, IndexY: 4},
+				{IndexX: 1, IndexY: 4},
+				{IndexX: 2, IndexY: 4},
+				{IndexX: 1, IndexY: 4},
 			},
 			10,
 		),
 		SpritePushingIdle: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 2},
+				{IndexX: 1, IndexY: 4},
 			},
 			1,
 		),
 		SpriteBackground: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 0},
+				{IndexX: 0, IndexY: 2},
 			},
 			1,
 		),
 		SpriteWall: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 0},
+				{IndexX: 1, IndexY: 2},
 			},
 			1,
 		),
 		SpriteTile: NewSprite(
 			[]Frame{
-				{IndexX: 2, IndexY: 0},
+				{IndexX: 2, IndexY: 2},
 			},
 			1,
 		),
 		SpriteTileFlagged: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 0},
+				{IndexX: 3, IndexY: 2},
 			},
 			1,
 		),
 		SpriteBox: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 1},
+				{IndexX: 3, IndexY: 3},
 			},
 			1,
 		),
 		SpriteBoxDone: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 2},
+				{IndexX: 3, IndexY: 4},
 			},
 			1,
 		),

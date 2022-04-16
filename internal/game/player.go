@@ -65,6 +65,7 @@ func (p *Player) checkLeft() {
 	p.direction = 180
 	p.idle = false
 	p.pushing = pushing
+	steps++
 }
 
 func (p *Player) checkRight() {
@@ -96,6 +97,7 @@ func (p *Player) checkRight() {
 	p.direction = 0
 	p.idle = false
 	p.pushing = pushing
+	steps++
 }
 
 func (p *Player) checkUp() {
@@ -127,6 +129,7 @@ func (p *Player) checkUp() {
 	p.direction = 270
 	p.idle = false
 	p.pushing = pushing
+	steps++
 }
 
 func (p *Player) checkDown() {
@@ -158,6 +161,7 @@ func (p *Player) checkDown() {
 	p.direction = 90
 	p.idle = false
 	p.pushing = pushing
+	steps++
 }
 
 func (p *Player) Update() {
