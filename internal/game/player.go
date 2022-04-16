@@ -203,7 +203,9 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	opts.GeoM.Rotate(p.DirectionTheta())
 	opts.GeoM.Translate(tileWidth/2, tileWidth/2)
 
-	opts.GeoM.Translate(p.PositionX, p.PositionY)
+	opts.GeoM.Scale(Scale(), Scale())
+
+	opts.GeoM.Translate(p.PositionX*Scale(), p.PositionY*Scale())
 
 	switch {
 	case p.idle && !p.pushing:

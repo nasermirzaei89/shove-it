@@ -12,33 +12,33 @@ type Box struct {
 	I, J                 int
 }
 
-func (p Box) DesiredX() float64 {
-	return float64(p.I * tileWidth)
+func (box Box) DesiredX() float64 {
+	return float64(box.I * tileWidth)
 }
 
-func (p Box) DesiredY() float64 {
-	return float64(p.J * tileWidth)
+func (box Box) DesiredY() float64 {
+	return float64(box.J * tileWidth)
 }
 
-func (p *Box) Update() {
-	if p.DesiredX() != p.PositionX {
-		if math.Signbit(p.DesiredX() - p.PositionX) {
-			p.PositionX -= movementSpeed
+func (box *Box) Update() {
+	if box.DesiredX() != box.PositionX {
+		if math.Signbit(box.DesiredX() - box.PositionX) {
+			box.PositionX -= movementSpeed
 		} else {
-			p.PositionX += movementSpeed
+			box.PositionX += movementSpeed
 		}
 	}
 
-	if p.DesiredY() != p.PositionY {
-		if math.Signbit(p.DesiredY() - p.PositionY) {
-			p.PositionY -= movementSpeed
+	if box.DesiredY() != box.PositionY {
+		if math.Signbit(box.DesiredY() - box.PositionY) {
+			box.PositionY -= movementSpeed
 		} else {
-			p.PositionY += movementSpeed
+			box.PositionY += movementSpeed
 		}
 	}
 }
 
-func (p *Box) Draw(screen *ebiten.Image) {
+func (box *Box) Draw(screen *ebiten.Image) {
 	opts := ebiten.DrawImageOptions{
 		GeoM:          ebiten.GeoM{},
 		ColorM:        ebiten.ColorM{},
@@ -46,10 +46,12 @@ func (p *Box) Draw(screen *ebiten.Image) {
 		Filter:        0,
 	}
 
-	opts.GeoM.Translate(p.PositionX, p.PositionY)
+	opts.GeoM.Scale(Scale(), Scale())
+
+	opts.GeoM.Translate(box.PositionX*Scale(), box.PositionY*Scale())
 
 	currentSprite := SpriteBox
-	if p.Done() {
+	if box.Done() {
 		currentSprite = SpriteBoxDone
 	}
 
@@ -65,6 +67,6 @@ func (p *Box) Draw(screen *ebiten.Image) {
 	screen.DrawImage(img, &opts)
 }
 
-func (p *Box) Done() bool {
-	return (CurrentRoomData()[p.J][p.I] == ItemTileFlagged || CurrentRoomData()[p.J][p.I] == ItemBoxDone) && p.DesiredX() == p.PositionX && p.DesiredY() == p.PositionY
+func (box *Box) Done() bool {
+	return (CurrentRoomData()[box.J][box.I] == ItemTileFlagged || CurrentRoomData()[box.J][box.I] == ItemBoxDone) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
 }

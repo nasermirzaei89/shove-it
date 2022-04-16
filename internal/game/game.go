@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"math"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,6 +13,9 @@ import (
 const (
 	tileWidth     = 24
 	movementSpeed = 2
+	screenWidth   = 320
+	screenHeight  = 224
+	scaleFactor   = 3
 )
 
 type SpriteName string
@@ -40,7 +44,21 @@ var (
 	roomIndex          = 0
 	keyPageUpPressed   = false
 	keyPageDownPressed = false
+	keyF5Pressed       = false
 )
+
+func Scale() float64 {
+	// 336 => 14
+	// x(288)   => 12
+	// x * y = 336
+	scaleX := float64(scaleFactor*14) / float64(CurrentRoomData().Width())
+	// 240 => 10
+	// x(288)   => 12
+	// x * y = 240
+	scaleY := float64(scaleFactor*10) / float64(CurrentRoomData().Height())
+
+	return math.Min(scaleX, scaleY)
+}
 
 type Game struct{}
 
@@ -81,6 +99,16 @@ func (g *Game) Update() error {
 		keyPageDownPressed = false
 	}
 
+	if ebiten.IsKeyPressed(ebiten.KeyF5) {
+		if !keyF5Pressed {
+			g.LoadRoom()
+
+			keyF5Pressed = true
+		}
+	} else {
+		keyF5Pressed = false
+	}
+
 	return nil
 }
 
@@ -96,23 +124,21 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	player.Draw(screen)
 
 	// HUD
-	hudY := len(CurrentRoomData())*tileWidth - 2*characterWidth
+	DrawText(screen, 2, 26, "STEP", false)
+	DrawText(screen, 12, 26, strconv.Itoa(steps), true)
 
-	DrawText(screen, 2*characterWidth, hudY, "STEP", false)
-	DrawText(screen, 12*characterWidth, hudY, strconv.Itoa(steps), true)
+	DrawText(screen, 16, 26, "STAGE", false)
+	DrawText(screen, 24, 26, strconv.Itoa(stageIndex+1), true)
 
-	DrawText(screen, 16*characterWidth, hudY, "STAGE", false)
-	DrawText(screen, 24*characterWidth, hudY, strconv.Itoa(stageIndex+1), true)
-
-	DrawText(screen, 28*characterWidth, hudY, "ROOM", false)
-	DrawText(screen, 36*characterWidth, hudY, strconv.Itoa(roomIndex+1), true)
+	DrawText(screen, 28, 26, "ROOM", false)
+	DrawText(screen, 36, 26, strconv.Itoa(roomIndex+1), true)
 }
 
 func (g *Game) Layout(int, int) (int, int) {
-	return len(CurrentRoomData()[0]) * tileWidth, len(CurrentRoomData()) * tileWidth
+	return screenWidth * scaleFactor, screenHeight * scaleFactor
 }
 
-func CurrentRoomData() [][]int {
+func CurrentRoomData() Data {
 	return stages[stageIndex].Rooms[roomIndex].Data
 }
 
@@ -123,7 +149,7 @@ func (g *Game) NextRoom() {
 		stageIndex++
 
 		if stageIndex == len(stages) {
-			panic(errors.New("game finished")) // TODO
+			stageIndex = 0
 		}
 	}
 
@@ -137,7 +163,7 @@ func (g *Game) PrevRoom() {
 		stageIndex--
 
 		if stageIndex < 0 {
-			panic(errors.New("game finished")) // TODO
+			stageIndex = len(stages) - 1
 		}
 
 		roomIndex = len(stages[stageIndex].Rooms) - 1
@@ -312,6 +338,7 @@ func New(spriteSheetPNG []byte) (*Game, error) {
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowTitle("Shove It")
 	ebiten.SetRunnableOnUnfocused(false)
+	ebiten.SetWindowSize(screenWidth*scaleFactor, screenHeight*scaleFactor)
 
 	return &game1, nil
 }

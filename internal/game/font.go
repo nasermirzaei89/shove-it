@@ -10,9 +10,11 @@ const characterWidth = 8
 
 var textMap = map[int32]*ebiten.Image{}
 
+// DrawText renders text on screen.
+// x and y are base on 40x28 dimension indexing.
 func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
 	if alignRight {
-		x -= len(text) * characterWidth
+		x -= len(text)
 	}
 
 	for i, c := range text {
@@ -20,7 +22,8 @@ func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
 
 		opts := new(ebiten.DrawImageOptions)
 
-		opts.GeoM.Translate(float64(x+i*characterWidth), float64(y))
+		opts.GeoM.Scale(scaleFactor, scaleFactor)
+		opts.GeoM.Translate(float64(x+i)*characterWidth*scaleFactor, float64(y)*characterWidth*scaleFactor)
 
 		screen.DrawImage(img, opts)
 	}

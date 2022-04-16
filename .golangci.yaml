@@ -17,4 +17,4 @@ linters:
     - gochecknoglobals
     - cyclop
     - funlen
-    - godox
+    - dupl

@@ -19,7 +19,9 @@ func (obj *Object) Draw(screen *ebiten.Image) {
 		Filter:        0,
 	}
 
-	opts.GeoM.Translate(obj.PositionX, obj.PositionY)
+	opts.GeoM.Scale(Scale(), Scale())
+
+	opts.GeoM.Translate(obj.PositionX*Scale(), obj.PositionY*Scale())
 
 	currentFrame := sprites[obj.Sprite].Frames[0]
 
