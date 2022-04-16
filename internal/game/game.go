@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 
@@ -90,12 +91,12 @@ func (g *Game) Layout(int, int) (int, int) {
 	return len(mapData[0]) * tileWidth, len(mapData) * tileWidth
 }
 
-func New() (*Game, error) {
+func New(spriteSheetPNG []byte) (*Game, error) {
 	game1 := Game{}
 
 	var err error
 
-	spriteSheet, _, err = ebitenutil.NewImageFromFile("./spritesheet.png")
+	spriteSheet, _, err = ebitenutil.NewImageFromReader(bytes.NewReader(spriteSheetPNG))
 	if err != nil {
 		return nil, errors.Wrap(err, "error on new image from file")
 	}

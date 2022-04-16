@@ -1,14 +1,20 @@
 package mobile
 
 import (
+	_ "embed"
+
 	"github.com/hajimehoshi/ebiten/v2/mobile"
 	"github.com/nasermirzaei89/shove-it/internal/game"
 	"github.com/pkg/errors"
 )
 
+//go:generate cp ../spritesheet.png .
+//go:embed spritesheet.png
+var spriteSheetPNG []byte
+
 //nolint:gochecknoinits
 func init() {
-	game1, err := game.New()
+	game1, err := game.New(spriteSheetPNG)
 	if err != nil {
 		panic(errors.Wrap(err, "error on new game"))
 	}
