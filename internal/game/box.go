@@ -66,5 +66,5 @@ func (p *Box) Draw(screen *ebiten.Image) {
 }
 
 func (p *Box) Done() bool {
-	return mapData[p.J][p.I] == ItemTileFlagged && p.DesiredX() == p.PositionX && p.DesiredY() == p.PositionY
+	return (CurrentRoomData()[p.J][p.I] == ItemTileFlagged || CurrentRoomData()[p.J][p.I] == ItemBoxDone) && p.DesiredX() == p.PositionX && p.DesiredY() == p.PositionY
 }

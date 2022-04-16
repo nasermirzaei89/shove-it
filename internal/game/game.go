@@ -2,7 +2,6 @@ package game
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,33 +30,56 @@ const (
 )
 
 var (
-	player      *Player
-	boxes       []*Box
-	objects     []*Object
-	sprites     map[SpriteName]*Sprite
-	spriteSheet *ebiten.Image
-	done        bool
-	steps       int
-	stage       = 1
-	room        = 1
+	player             *Player
+	boxes              []*Box
+	objects            []*Object
+	sprites            map[SpriteName]*Sprite
+	spriteSheet        *ebiten.Image
+	steps              = 0
+	stageIndex         = 0
+	roomIndex          = 0
+	keyPageUpPressed   = false
+	keyPageDownPressed = false
 )
 
 type Game struct{}
 
 func (g *Game) Update() error {
-	check := true
+	done := true
 
 	for i := range boxes {
 		boxes[i].Update()
 
 		if !boxes[i].Done() {
-			check = false
+			done = false
 		}
 	}
 
 	player.Update()
 
-	done = check
+	if done {
+		g.NextRoom()
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyPageUp) {
+		if !keyPageUpPressed {
+			g.NextRoom()
+
+			keyPageUpPressed = true
+		}
+	} else {
+		keyPageUpPressed = false
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyPageDown) {
+		if !keyPageDownPressed {
+			g.PrevRoom()
+
+			keyPageDownPressed = true
+		}
+	} else {
+		keyPageDownPressed = false
+	}
 
 	return nil
 }
@@ -74,21 +96,136 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	player.Draw(screen)
 
 	// HUD
+	hudY := len(CurrentRoomData())*tileWidth - 2*characterWidth
 
-	DrawText(screen, 2*characterWidth, 200, "STEP", false)
-	DrawText(screen, 12*characterWidth, 200, strconv.Itoa(steps), true)
+	DrawText(screen, 2*characterWidth, hudY, "STEP", false)
+	DrawText(screen, 12*characterWidth, hudY, strconv.Itoa(steps), true)
 
-	DrawText(screen, 16*characterWidth, 200, "STAGE", false)
-	DrawText(screen, 24*characterWidth, 200, strconv.Itoa(stage), true)
+	DrawText(screen, 16*characterWidth, hudY, "STAGE", false)
+	DrawText(screen, 24*characterWidth, hudY, strconv.Itoa(stageIndex+1), true)
 
-	DrawText(screen, 28*characterWidth, 200, "ROOM", false)
-	DrawText(screen, 36*characterWidth, 200, strconv.Itoa(room), true)
-
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("%t", done))
+	DrawText(screen, 28*characterWidth, hudY, "ROOM", false)
+	DrawText(screen, 36*characterWidth, hudY, strconv.Itoa(roomIndex+1), true)
 }
 
 func (g *Game) Layout(int, int) (int, int) {
-	return len(mapData[0]) * tileWidth, len(mapData) * tileWidth
+	return len(CurrentRoomData()[0]) * tileWidth, len(CurrentRoomData()) * tileWidth
+}
+
+func CurrentRoomData() [][]int {
+	return stages[stageIndex].Rooms[roomIndex].Data
+}
+
+func (g *Game) NextRoom() {
+	roomIndex++
+	if roomIndex == len(stages[stageIndex].Rooms) {
+		roomIndex = 0
+		stageIndex++
+
+		if stageIndex == len(stages) {
+			panic(errors.New("game finished")) // TODO
+		}
+	}
+
+	g.LoadRoom()
+}
+
+func (g *Game) PrevRoom() {
+	roomIndex--
+
+	if roomIndex < 0 {
+		stageIndex--
+
+		if stageIndex < 0 {
+			panic(errors.New("game finished")) // TODO
+		}
+
+		roomIndex = len(stages[stageIndex].Rooms) - 1
+	}
+
+	g.LoadRoom()
+}
+
+func (g *Game) LoadRoom() {
+	data := CurrentRoomData()
+
+	objects = make([]*Object, 0)
+	boxes = make([]*Box, 0)
+	steps = 0
+
+	for j := range data {
+		for i := range data[j] {
+			switch data[j][i] {
+			case ItemBackground:
+				objects = append(objects, &Object{
+					Sprite:    SpriteBackground,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+			case ItemWall:
+				objects = append(objects, &Object{
+					Sprite:    SpriteWall,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+			case ItemTile:
+				objects = append(objects, &Object{
+					Sprite:    SpriteTile,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+			case ItemTileFlagged:
+				objects = append(objects, &Object{
+					Sprite:    SpriteTileFlagged,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+			case ItemPlayer:
+				objects = append(objects, &Object{
+					Sprite:    SpriteTile,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+				player = &Player{
+					PositionX:     float64(i * tileWidth),
+					PositionY:     float64(j * tileWidth),
+					I:             i,
+					J:             j,
+					direction:     270,
+					animation:     0,
+					currentSprite: SpriteIdle,
+					idle:          true,
+					pushing:       false,
+				}
+			case ItemBox:
+				objects = append(objects, &Object{
+					Sprite:    SpriteTile,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+
+				boxes = append(boxes, &Box{
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+					I:         i,
+					J:         j,
+				})
+			case ItemBoxDone:
+				objects = append(objects, &Object{
+					Sprite:    SpriteTileFlagged,
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+				})
+
+				boxes = append(boxes, &Box{
+					PositionX: float64(i * tileWidth),
+					PositionY: float64(j * tileWidth),
+					I:         i,
+					J:         j,
+				})
+			}
+		}
+	}
 }
 
 func New(spriteSheetPNG []byte) (*Game, error) {
@@ -170,79 +307,7 @@ func New(spriteSheetPNG []byte) (*Game, error) {
 		),
 	}
 
-	for j := range mapData {
-		for i := range mapData[j] {
-			switch mapData[j][i] {
-			case ItemBackground:
-				objects = append(objects, &Object{
-					Sprite:    SpriteBackground,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-			case ItemWall:
-				objects = append(objects, &Object{
-					Sprite:    SpriteWall,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-			case ItemTile:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-			case ItemTileFlagged:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTileFlagged,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-			case ItemPlayer:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-				player = &Player{
-					PositionX:     float64(i * tileWidth),
-					PositionY:     float64(j * tileWidth),
-					I:             i,
-					J:             j,
-					direction:     0,
-					animation:     0,
-					currentSprite: SpriteIdle,
-					idle:          true,
-					pushing:       false,
-				}
-			case ItemBox:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-
-				boxes = append(boxes, &Box{
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-					I:         i,
-					J:         j,
-				})
-			case ItemBoxDone:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTileFlagged,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-
-				boxes = append(boxes, &Box{
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-					I:         i,
-					J:         j,
-				})
-			}
-		}
-	}
+	game1.LoadRoom()
 
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowTitle("Shove It")
