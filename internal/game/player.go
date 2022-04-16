@@ -15,7 +15,16 @@ type Player struct {
 	currentSprite        SpriteName
 	idle                 bool
 	pushing              bool
+	history              []int
+	boxHistory           []int
 }
+
+const (
+	moveLeft = iota
+	moveRight
+	moveUp
+	moveDown
+)
 
 func (p Player) DesiredX() float64 {
 	return float64(p.I * tileWidth)
@@ -58,6 +67,8 @@ func (p *Player) checkLeft() {
 			pushing = true
 
 			boxes[i].I--
+
+			p.boxHistory = append(p.boxHistory, i)
 		}
 	}
 
@@ -65,7 +76,11 @@ func (p *Player) checkLeft() {
 	p.direction = 180
 	p.idle = false
 	p.pushing = pushing
-	steps++
+	p.history = append(p.history, moveLeft)
+
+	if !pushing {
+		p.boxHistory = append(p.boxHistory, -1)
+	}
 }
 
 func (p *Player) checkRight() {
@@ -90,6 +105,8 @@ func (p *Player) checkRight() {
 			pushing = true
 
 			boxes[i].I++
+
+			p.boxHistory = append(p.boxHistory, i)
 		}
 	}
 
@@ -97,7 +114,11 @@ func (p *Player) checkRight() {
 	p.direction = 0
 	p.idle = false
 	p.pushing = pushing
-	steps++
+	p.history = append(p.history, moveRight)
+
+	if !pushing {
+		p.boxHistory = append(p.boxHistory, -1)
+	}
 }
 
 func (p *Player) checkUp() {
@@ -122,6 +143,8 @@ func (p *Player) checkUp() {
 			pushing = true
 
 			boxes[i].J--
+
+			p.boxHistory = append(p.boxHistory, i)
 		}
 	}
 
@@ -129,7 +152,11 @@ func (p *Player) checkUp() {
 	p.direction = 270
 	p.idle = false
 	p.pushing = pushing
-	steps++
+	p.history = append(p.history, moveUp)
+
+	if !pushing {
+		p.boxHistory = append(p.boxHistory, -1)
+	}
 }
 
 func (p *Player) checkDown() {
@@ -154,6 +181,8 @@ func (p *Player) checkDown() {
 			pushing = true
 
 			boxes[i].J++
+
+			p.boxHistory = append(p.boxHistory, i)
 		}
 	}
 
@@ -161,7 +190,61 @@ func (p *Player) checkDown() {
 	p.direction = 90
 	p.idle = false
 	p.pushing = pushing
-	steps++
+
+	p.history = append(p.history, moveDown)
+
+	if !pushing {
+		p.boxHistory = append(p.boxHistory, -1)
+	}
+}
+
+func (p *Player) checkUndo() {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyBackspace) || len(p.history) == 0 {
+		return
+	}
+
+	pushing := false
+
+	switch p.history[len(p.history)-1] {
+	case moveLeft:
+		p.I++
+		p.direction = 180
+
+		if p.boxHistory[len(p.history)-1] != -1 {
+			pushing = true
+			boxes[p.boxHistory[len(p.history)-1]].I++
+		}
+	case moveRight:
+		p.I--
+		p.direction = 0
+
+		if p.boxHistory[len(p.history)-1] != -1 {
+			pushing = true
+			boxes[p.boxHistory[len(p.history)-1]].I--
+		}
+	case moveUp:
+		p.J++
+		p.direction = 270
+
+		if p.boxHistory[len(p.history)-1] != -1 {
+			pushing = true
+			boxes[p.boxHistory[len(p.history)-1]].J++
+		}
+	case moveDown:
+		p.J--
+		p.direction = 90
+
+		if p.boxHistory[len(p.history)-1] != -1 {
+			pushing = true
+			boxes[p.boxHistory[len(p.history)-1]].J--
+		}
+	}
+
+	p.idle = false
+	p.pushing = pushing
+
+	p.history = p.history[:len(p.history)-1]
+	p.boxHistory = p.boxHistory[:len(p.boxHistory)-1]
 }
 
 func (p *Player) Update() {
@@ -169,6 +252,7 @@ func (p *Player) Update() {
 	p.checkRight()
 	p.checkUp()
 	p.checkDown()
+	p.checkUndo()
 
 	if p.DesiredX() != p.PositionX {
 		if math.Signbit(p.DesiredX() - p.PositionX) {

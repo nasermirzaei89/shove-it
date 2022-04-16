@@ -39,7 +39,6 @@ var (
 	objects            []*Object
 	sprites            map[SpriteName]*Sprite
 	spriteSheet        *ebiten.Image
-	steps              = 0
 	stageIndex         = 0
 	roomIndex          = 0
 	keyPageUpPressed   = false
@@ -125,7 +124,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// HUD
 	DrawText(screen, 2, 26, "STEP", false)
-	DrawText(screen, 12, 26, strconv.Itoa(steps), true)
+	DrawText(screen, 12, 26, strconv.Itoa(len(player.history)), true)
 
 	DrawText(screen, 16, 26, "STAGE", false)
 	DrawText(screen, 24, 26, strconv.Itoa(stageIndex+1), true)
@@ -177,7 +176,6 @@ func (g *Game) LoadRoom() {
 
 	objects = make([]*Object, 0)
 	boxes = make([]*Box, 0)
-	steps = 0
 
 	for j := range data {
 		for i := range data[j] {
@@ -222,6 +220,8 @@ func (g *Game) LoadRoom() {
 					currentSprite: SpriteIdle,
 					idle:          true,
 					pushing:       false,
+					history:       []int{},
+					boxHistory:    []int{},
 				}
 			case ItemBox:
 				objects = append(objects, &Object{
