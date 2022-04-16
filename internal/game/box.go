@@ -49,7 +49,7 @@ func (p *Box) Draw(screen *ebiten.Image) {
 	opts.GeoM.Translate(p.PositionX, p.PositionY)
 
 	currentSprite := SpriteBox
-	if mapData[p.J][p.I] == ItemTileFlagged {
+	if p.Done() {
 		currentSprite = SpriteBoxDone
 	}
 
@@ -63,4 +63,8 @@ func (p *Box) Draw(screen *ebiten.Image) {
 	)))
 
 	screen.DrawImage(img, &opts)
+}
+
+func (p *Box) Done() bool {
+	return mapData[p.J][p.I] == ItemTileFlagged && p.DesiredX() == p.PositionX && p.DesiredY() == p.PositionY
 }

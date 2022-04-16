@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/pkg/errors"
@@ -17,6 +19,7 @@ const (
 	SpriteIdle        SpriteName = "idle"
 	SpriteWalking     SpriteName = "walking"
 	SpritePushing     SpriteName = "pushing"
+	SpritePushingIdle SpriteName = "pushing-idle"
 	SpriteBackground  SpriteName = "background"
 	SpriteWall        SpriteName = "wall"
 	SpriteTile        SpriteName = "tile"
@@ -31,16 +34,25 @@ var (
 	objects     []*Object
 	sprites     map[SpriteName]*Sprite
 	spriteSheet *ebiten.Image
+	done        bool
 )
 
 type Game struct{}
 
 func (g *Game) Update() error {
+	check := true
+
 	for i := range boxes {
 		boxes[i].Update()
+
+		if !boxes[i].Done() {
+			check = false
+		}
 	}
 
 	player.Update()
+
+	done = check
 
 	return nil
 }
@@ -55,6 +67,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	player.Draw(screen)
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("%t", done))
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -95,6 +109,12 @@ func New() (*Game, error) {
 				{IndexX: 1, IndexY: 2},
 			},
 			10,
+		),
+		SpritePushingIdle: NewSprite(
+			[]Frame{
+				{IndexX: 1, IndexY: 2},
+			},
+			1,
 		),
 		SpriteBackground: NewSprite(
 			[]Frame{
@@ -173,9 +193,10 @@ func New() (*Game, error) {
 					I:             i,
 					J:             j,
 					direction:     0,
-					walking:       false,
 					animation:     0,
 					currentSprite: SpriteIdle,
+					idle:          true,
+					pushing:       false,
 				}
 			case ItemBox:
 				objects = append(objects, &Object{

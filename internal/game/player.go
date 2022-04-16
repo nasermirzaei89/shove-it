@@ -11,9 +11,10 @@ type Player struct {
 	PositionX, PositionY float64
 	I, J                 int
 	direction            int
-	walking              bool
 	animation            float64
 	currentSprite        SpriteName
+	idle                 bool
+	pushing              bool
 }
 
 func (p Player) DesiredX() float64 {
@@ -29,14 +30,18 @@ func (p Player) DirectionTheta() float64 {
 }
 
 func (p *Player) SetCurrentSprite(sprite SpriteName) {
-	p.currentSprite = sprite
-	p.animation = 0
+	if p.currentSprite != sprite {
+		p.currentSprite = sprite
+		p.animation = 0
+	}
 }
 
 func (p *Player) checkLeft() {
-	if p.walking || !ebiten.IsKeyPressed(ebiten.KeyLeft) || mapData[p.J][p.I-1] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || mapData[p.J][p.I-1] == ItemWall {
 		return
 	}
+
+	pushing := false
 
 	for i := range boxes {
 		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
@@ -50,20 +55,24 @@ func (p *Player) checkLeft() {
 				}
 			}
 
+			pushing = true
+
 			boxes[i].I--
 		}
 	}
 
 	p.I--
 	p.direction = 180
-	p.walking = true
-	p.SetCurrentSprite("walking")
+	p.idle = false
+	p.pushing = pushing
 }
 
 func (p *Player) checkRight() {
-	if p.walking || !ebiten.IsKeyPressed(ebiten.KeyRight) || mapData[p.J][p.I+1] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || mapData[p.J][p.I+1] == ItemWall {
 		return
 	}
+
+	pushing := false
 
 	for i := range boxes {
 		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
@@ -77,20 +86,24 @@ func (p *Player) checkRight() {
 				}
 			}
 
+			pushing = true
+
 			boxes[i].I++
 		}
 	}
 
 	p.I++
 	p.direction = 0
-	p.walking = true
-	p.SetCurrentSprite("walking")
+	p.idle = false
+	p.pushing = pushing
 }
 
 func (p *Player) checkUp() {
-	if p.walking || !ebiten.IsKeyPressed(ebiten.KeyUp) || mapData[p.J-1][p.I] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || mapData[p.J-1][p.I] == ItemWall {
 		return
 	}
+
+	pushing := false
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
@@ -104,20 +117,24 @@ func (p *Player) checkUp() {
 				}
 			}
 
+			pushing = true
+
 			boxes[i].J--
 		}
 	}
 
 	p.J--
 	p.direction = 270
-	p.walking = true
-	p.SetCurrentSprite("walking")
+	p.idle = false
+	p.pushing = pushing
 }
 
 func (p *Player) checkDown() {
-	if p.walking || !ebiten.IsKeyPressed(ebiten.KeyDown) || mapData[p.J+1][p.I] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || mapData[p.J+1][p.I] == ItemWall {
 		return
 	}
+
+	pushing := false
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
@@ -131,14 +148,16 @@ func (p *Player) checkDown() {
 				}
 			}
 
+			pushing = true
+
 			boxes[i].J++
 		}
 	}
 
 	p.J++
 	p.direction = 90
-	p.walking = true
-	p.SetCurrentSprite("walking")
+	p.idle = false
+	p.pushing = pushing
 }
 
 func (p *Player) Update() {
@@ -163,9 +182,8 @@ func (p *Player) Update() {
 		}
 	}
 
-	if p.walking && p.PositionX == p.DesiredX() && p.PositionY == p.DesiredY() {
-		p.walking = false
-		p.SetCurrentSprite("idle")
+	if !p.idle && p.PositionX == p.DesiredX() && p.PositionY == p.DesiredY() {
+		p.idle = true
 	}
 }
 
@@ -182,6 +200,17 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	opts.GeoM.Translate(tileWidth/2, tileWidth/2)
 
 	opts.GeoM.Translate(p.PositionX, p.PositionY)
+
+	switch {
+	case p.idle && !p.pushing:
+		p.SetCurrentSprite(SpriteIdle)
+	case p.idle && p.pushing:
+		p.SetCurrentSprite(SpritePushingIdle)
+	case !p.idle && !p.pushing:
+		p.SetCurrentSprite(SpriteWalking)
+	case !p.idle && p.pushing:
+		p.SetCurrentSprite(SpritePushing)
+	}
 
 	sprite := sprites[p.currentSprite]
 
