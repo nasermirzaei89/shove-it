@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/pkg/errors"
 )
 
@@ -34,16 +35,13 @@ const (
 )
 
 var (
-	player             *Player
-	boxes              []*Box
-	objects            []*Object
-	sprites            map[SpriteName]*Sprite
-	spriteSheet        *ebiten.Image
-	stageIndex         = 0
-	roomIndex          = 0
-	keyPageUpPressed   = false
-	keyPageDownPressed = false
-	keyF5Pressed       = false
+	player      *Player
+	boxes       []*Box
+	objects     []*Object
+	sprites     map[SpriteName]*Sprite
+	spriteSheet *ebiten.Image
+	stageIndex  = 0
+	roomIndex   = 0
 )
 
 func Scale() float64 {
@@ -78,34 +76,16 @@ func (g *Game) Update() error {
 		g.NextRoom()
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyPageUp) {
-		if !keyPageUpPressed {
-			g.NextRoom()
-
-			keyPageUpPressed = true
-		}
-	} else {
-		keyPageUpPressed = false
+	if inpututil.IsKeyJustPressed(ebiten.KeyPageUp) {
+		g.NextRoom()
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyPageDown) {
-		if !keyPageDownPressed {
-			g.PrevRoom()
-
-			keyPageDownPressed = true
-		}
-	} else {
-		keyPageDownPressed = false
+	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
+		g.PrevRoom()
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyF5) {
-		if !keyF5Pressed {
-			g.LoadRoom()
-
-			keyF5Pressed = true
-		}
-	} else {
-		keyF5Pressed = false
+	if inpututil.IsKeyJustPressed(ebiten.KeyF5) {
+		g.LoadRoom()
 	}
 
 	return nil
