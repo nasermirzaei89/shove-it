@@ -8,11 +8,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:embed spritesheet.png
+//go:embed assets/spritesheet.png
 var spriteSheetPNG []byte
 
+//go:embed assets/font.png
+var fontPNG []byte
+
 func main() {
-	game1, err := game.New(spriteSheetPNG)
+	game1, err := game.New(spriteSheetPNG, fontPNG)
 	if err != nil {
 		panic(errors.Wrap(err, "error on new game"))
 	}

@@ -8,8 +8,6 @@ import (
 
 const characterWidth = 8
 
-var textMap = map[int32]*ebiten.Image{}
-
 // DrawText renders text on screen.
 // x and y are base on 40x28 dimension indexing.
 func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
@@ -18,7 +16,9 @@ func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
 	}
 
 	for i, c := range text {
-		img := getCharImage(c)
+		cx := (int(c) - 32) * characterWidth
+
+		img := ebiten.NewImageFromImage(fontImage.SubImage(image.Rect(cx, 0, cx+characterWidth, characterWidth)))
 
 		opts := new(ebiten.DrawImageOptions)
 
@@ -27,16 +27,4 @@ func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
 
 		screen.DrawImage(img, opts)
 	}
-}
-
-func getCharImage(c int32) *ebiten.Image {
-	res, ok := textMap[c]
-	if !ok {
-		i := int(c) % 32
-		j := int(c)/32 - 1
-		res = ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(i*characterWidth, j*characterWidth, i*characterWidth+characterWidth, j*characterWidth+characterWidth)))
-		textMap[c] = res
-	}
-
-	return res
 }

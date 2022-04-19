@@ -8,13 +8,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate cp ../spritesheet.png .
-//go:embed spritesheet.png
+//go:generate cp -r ../assets .
+
+//go:embed assets/spritesheet.png
 var spriteSheetPNG []byte
+
+//go:embed assets/font.png
+var fontPNG []byte
 
 //nolint:gochecknoinits
 func init() {
-	game1, err := game.New(spriteSheetPNG)
+	game1, err := game.New(spriteSheetPNG, fontPNG)
 	if err != nil {
 		panic(errors.Wrap(err, "error on new game"))
 	}

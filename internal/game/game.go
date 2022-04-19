@@ -41,6 +41,7 @@ var (
 	objects     []*Object
 	sprites     map[SpriteName]*Sprite
 	spriteSheet *ebiten.Image
+	fontImage   *ebiten.Image
 	stageIndex  = 0
 	roomIndex   = 0
 )
@@ -262,12 +263,17 @@ func (g *Game) LoadRoom() {
 	}
 }
 
-func New(spriteSheetPNG []byte) (*Game, error) {
+func New(spriteSheetPNG, fontPNG []byte) (*Game, error) {
 	game1 := Game{}
 
 	var err error
 
 	spriteSheet, _, err = ebitenutil.NewImageFromReader(bytes.NewReader(spriteSheetPNG))
+	if err != nil {
+		return nil, errors.Wrap(err, "error on new image from file")
+	}
+
+	fontImage, _, err = ebitenutil.NewImageFromReader(bytes.NewReader(fontPNG))
 	if err != nil {
 		return nil, errors.Wrap(err, "error on new image from file")
 	}
