@@ -1,12 +1,14 @@
 package game
 
+import "image"
+
 type Sprite struct {
 	Frames []Frame
 	Speed  float64
 }
 
 type Frame struct {
-	IndexX, IndexY int
+	Rect image.Rectangle
 }
 
 func NewSprite(frames []Frame, speed float64) *Sprite {

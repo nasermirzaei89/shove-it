@@ -1,8 +1,6 @@
 package game
 
 import (
-	"image"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -25,12 +23,7 @@ func (obj *Object) Draw(screen *ebiten.Image) {
 
 	currentFrame := sprites[obj.Sprite].Frames[0]
 
-	img := ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(
-		currentFrame.IndexX*tileWidth,
-		currentFrame.IndexY*tileWidth,
-		(currentFrame.IndexX+1)*tileWidth,
-		(currentFrame.IndexY+1)*tileWidth,
-	)))
+	img := ebiten.NewImageFromImage(spriteSheet.SubImage(currentFrame.Rect))
 
 	screen.DrawImage(img, &opts)
 }

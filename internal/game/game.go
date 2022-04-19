@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"image"
 	"math"
 	"strconv"
 
@@ -29,7 +30,7 @@ const (
 	SpriteBackground  SpriteName = "background"
 	SpriteWall        SpriteName = "wall"
 	SpriteTile        SpriteName = "tile"
-	SpriteTileFlagged SpriteName = "tile-flagged"
+	SpriteFlag        SpriteName = "flag"
 	SpriteBox         SpriteName = "box"
 	SpriteBoxDone     SpriteName = "box-done"
 )
@@ -151,6 +152,88 @@ func (g *Game) PrevRoom() {
 	g.LoadRoom()
 }
 
+func createBackgroundAt(i, j int) {
+	for m := 0; m < 3; m++ {
+		for n := 0; n < 3; n++ {
+			objects = append(objects, &Object{
+				Sprite:    SpriteBackground,
+				PositionX: float64(i*tileWidth + m*8),
+				PositionY: float64(j*tileWidth + n*8),
+			})
+		}
+	}
+}
+
+func createWallAt(i, j int) {
+	objects = append(objects, &Object{
+		Sprite:    SpriteWall,
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
+	})
+}
+
+func createTileAt(i, j int) {
+	for m := 0; m < 3; m++ {
+		for n := 0; n < 3; n++ {
+			objects = append(objects, &Object{
+				Sprite:    SpriteTile,
+				PositionX: float64(i*tileWidth + m*8),
+				PositionY: float64(j*tileWidth + n*8),
+			})
+		}
+	}
+}
+
+func createFlaggedTileAt(i, j int) {
+	createTileAt(i, j)
+
+	objects = append(objects, &Object{
+		Sprite:    SpriteFlag,
+		PositionX: float64(i*tileWidth + 8),
+		PositionY: float64(j*tileWidth + 8),
+	})
+}
+
+func createPlayerAt(i, j int) {
+	createTileAt(i, j)
+
+	player = &Player{
+		PositionX:     float64(i * tileWidth),
+		PositionY:     float64(j * tileWidth),
+		I:             i,
+		J:             j,
+		direction:     270,
+		animation:     0,
+		currentSprite: SpriteIdle,
+		idle:          true,
+		pushing:       false,
+		history:       []int{},
+		boxHistory:    []int{},
+	}
+}
+
+func createBoxAt(i, j int) {
+	createTileAt(i, j)
+
+	boxes = append(boxes, &Box{
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
+		I:         i,
+		J:         j,
+	})
+}
+
+func createBoxDoneAt(i, j int) {
+	createFlaggedTileAt(i, j)
+
+	boxes = append(boxes, &Box{
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
+		I:         i,
+		J:         j,
+	})
+}
+
 func (g *Game) LoadRoom() {
 	data := CurrentRoomData()
 
@@ -161,74 +244,19 @@ func (g *Game) LoadRoom() {
 		for i := range data[j] {
 			switch data[j][i] {
 			case ItemBackground:
-				objects = append(objects, &Object{
-					Sprite:    SpriteBackground,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
+				createBackgroundAt(i, j)
 			case ItemWall:
-				objects = append(objects, &Object{
-					Sprite:    SpriteWall,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
+				createWallAt(i, j)
 			case ItemTile:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
+				createTileAt(i, j)
 			case ItemTileFlagged:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTileFlagged,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
+				createFlaggedTileAt(i, j)
 			case ItemPlayer:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-				player = &Player{
-					PositionX:     float64(i * tileWidth),
-					PositionY:     float64(j * tileWidth),
-					I:             i,
-					J:             j,
-					direction:     270,
-					animation:     0,
-					currentSprite: SpriteIdle,
-					idle:          true,
-					pushing:       false,
-					history:       []int{},
-					boxHistory:    []int{},
-				}
+				createPlayerAt(i, j)
 			case ItemBox:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTile,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-
-				boxes = append(boxes, &Box{
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-					I:         i,
-					J:         j,
-				})
+				createBoxAt(i, j)
 			case ItemBoxDone:
-				objects = append(objects, &Object{
-					Sprite:    SpriteTileFlagged,
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-				})
-
-				boxes = append(boxes, &Box{
-					PositionX: float64(i * tileWidth),
-					PositionY: float64(j * tileWidth),
-					I:         i,
-					J:         j,
-				})
+				createBoxDoneAt(i, j)
 			}
 		}
 	}
@@ -247,67 +275,67 @@ func New(spriteSheetPNG []byte) (*Game, error) {
 	sprites = map[SpriteName]*Sprite{
 		SpriteIdle: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 3},
+				{Rect: image.Rect(24, 88, 48, 112)},
 			},
 			1,
 		),
 		SpriteWalking: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 3},
-				{IndexX: 1, IndexY: 3},
-				{IndexX: 2, IndexY: 3},
-				{IndexX: 1, IndexY: 3},
+				{Rect: image.Rect(0, 88, 24, 112)},
+				{Rect: image.Rect(24, 88, 48, 112)},
+				{Rect: image.Rect(48, 88, 72, 112)},
+				{Rect: image.Rect(24, 88, 48, 112)},
 			},
 			10,
 		),
 		SpritePushing: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 4},
-				{IndexX: 1, IndexY: 4},
-				{IndexX: 2, IndexY: 4},
-				{IndexX: 1, IndexY: 4},
+				{Rect: image.Rect(72, 88, 96, 112)},
+				{Rect: image.Rect(96, 88, 120, 112)},
+				{Rect: image.Rect(120, 88, 144, 112)},
+				{Rect: image.Rect(96, 88, 120, 112)},
 			},
 			10,
 		),
 		SpritePushingIdle: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 4},
+				{Rect: image.Rect(96, 88, 120, 112)},
 			},
 			1,
 		),
 		SpriteBackground: NewSprite(
 			[]Frame{
-				{IndexX: 0, IndexY: 2},
+				{Rect: image.Rect(0, 16, 8, 24)},
 			},
 			1,
 		),
 		SpriteWall: NewSprite(
 			[]Frame{
-				{IndexX: 1, IndexY: 2},
+				{Rect: image.Rect(0, 112, 24, 136)},
 			},
 			1,
 		),
 		SpriteTile: NewSprite(
 			[]Frame{
-				{IndexX: 2, IndexY: 2},
+				{Rect: image.Rect(8, 16, 16, 24)},
 			},
 			1,
 		),
-		SpriteTileFlagged: NewSprite(
+		SpriteFlag: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 2},
+				{Rect: image.Rect(80, 16, 88, 24)},
 			},
 			1,
 		),
 		SpriteBox: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 3},
+				{Rect: image.Rect(0, 136, 24, 160)},
 			},
 			1,
 		),
 		SpriteBoxDone: NewSprite(
 			[]Frame{
-				{IndexX: 3, IndexY: 4},
+				{Rect: image.Rect(0, 160, 24, 184)},
 			},
 			1,
 		),

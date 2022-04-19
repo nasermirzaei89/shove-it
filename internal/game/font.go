@@ -32,8 +32,8 @@ func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
 func getCharImage(c int32) *ebiten.Image {
 	res, ok := textMap[c]
 	if !ok {
-		i := int(c) % 16
-		j := int(c) / 16
+		i := int(c) % 32
+		j := int(c)/32 - 1
 		res = ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(i*characterWidth, j*characterWidth, i*characterWidth+characterWidth, j*characterWidth+characterWidth)))
 		textMap[c] = res
 	}
