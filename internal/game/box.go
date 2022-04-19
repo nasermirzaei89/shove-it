@@ -1,6 +1,7 @@
 package game
 
 import (
+	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -49,14 +50,14 @@ func (box *Box) Draw(screen *ebiten.Image) {
 
 	opts.GeoM.Translate(box.PositionX*Scale(), box.PositionY*Scale())
 
-	currentSprite := SpriteBox
+	currentSprite := SpriteBox1
 	if box.Done() {
-		currentSprite = SpriteBoxDone
+		currentSprite = SpriteBoxDone1
 	}
 
 	currentFrame := sprites[currentSprite].Frames[0]
 
-	img := ebiten.NewImageFromImage(spriteSheet.SubImage(currentFrame.Rect))
+	img := ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
 
 	screen.DrawImage(img, &opts)
 }

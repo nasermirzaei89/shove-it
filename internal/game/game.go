@@ -2,7 +2,6 @@ package game
 
 import (
 	"bytes"
-	"image"
 	"math"
 	"strconv"
 
@@ -27,12 +26,38 @@ const (
 	SpriteWalking     SpriteName = "walking"
 	SpritePushing     SpriteName = "pushing"
 	SpritePushingIdle SpriteName = "pushing-idle"
-	SpriteBackground  SpriteName = "background"
-	SpriteWall        SpriteName = "wall"
-	SpriteTile        SpriteName = "tile"
-	SpriteFlag        SpriteName = "flag"
-	SpriteBox         SpriteName = "box"
-	SpriteBoxDone     SpriteName = "box-done"
+
+	SpriteBackground1 SpriteName = "background1"
+	SpriteBackground2 SpriteName = "background2"
+	SpriteBackground3 SpriteName = "background3"
+	SpriteBackground4 SpriteName = "background4"
+	SpriteBackground5 SpriteName = "background5"
+	SpriteBackground6 SpriteName = "background6"
+
+	SpriteWall1 SpriteName = "wall1"
+	SpriteWall2 SpriteName = "wall2"
+	SpriteWall3 SpriteName = "wall3"
+	SpriteWall4 SpriteName = "wall4"
+
+	SpriteTile1 SpriteName = "tile1"
+	SpriteTile2 SpriteName = "tile2"
+	SpriteTile3 SpriteName = "tile3"
+
+	SpriteFlag1 SpriteName = "flag1"
+	SpriteFlag2 SpriteName = "flag2"
+	SpriteFlag3 SpriteName = "flag3"
+
+	SpriteBox1 SpriteName = "box1"
+	SpriteBox2 SpriteName = "box2"
+	SpriteBox3 SpriteName = "box3"
+	SpriteBox4 SpriteName = "box4"
+	SpriteBox5 SpriteName = "box5"
+
+	SpriteBoxDone1 SpriteName = "box-done1"
+	SpriteBoxDone2 SpriteName = "box-done2"
+	SpriteBoxDone3 SpriteName = "box-done3"
+	SpriteBoxDone4 SpriteName = "box-done4"
+	SpriteBoxDone5 SpriteName = "box-done5"
 )
 
 var (
@@ -154,44 +179,34 @@ func (g *Game) PrevRoom() {
 }
 
 func createBackgroundAt(i, j int) {
-	for m := 0; m < 3; m++ {
-		for n := 0; n < 3; n++ {
-			objects = append(objects, &Object{
-				Sprite:    SpriteBackground,
-				PositionX: float64(i*tileWidth + m*8),
-				PositionY: float64(j*tileWidth + n*8),
-			})
-		}
-	}
+	objects = append(objects, &Object{
+		Sprite:    SpriteBackground1,
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
+	})
 }
 
 func createWallAt(i, j int) {
 	objects = append(objects, &Object{
-		Sprite:    SpriteWall,
+		Sprite:    SpriteWall1,
 		PositionX: float64(i * tileWidth),
 		PositionY: float64(j * tileWidth),
 	})
 }
 
 func createTileAt(i, j int) {
-	for m := 0; m < 3; m++ {
-		for n := 0; n < 3; n++ {
-			objects = append(objects, &Object{
-				Sprite:    SpriteTile,
-				PositionX: float64(i*tileWidth + m*8),
-				PositionY: float64(j*tileWidth + n*8),
-			})
-		}
-	}
+	objects = append(objects, &Object{
+		Sprite:    SpriteTile1,
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
+	})
 }
 
 func createFlaggedTileAt(i, j int) {
-	createTileAt(i, j)
-
 	objects = append(objects, &Object{
-		Sprite:    SpriteFlag,
-		PositionX: float64(i*tileWidth + 8),
-		PositionY: float64(j*tileWidth + 8),
+		Sprite:    SpriteFlag1,
+		PositionX: float64(i * tileWidth),
+		PositionY: float64(j * tileWidth),
 	})
 }
 
@@ -281,67 +296,187 @@ func New(spriteSheetPNG, fontPNG []byte) (*Game, error) {
 	sprites = map[SpriteName]*Sprite{
 		SpriteIdle: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(24, 88, 48, 112)},
+				{I: 1, J: 0},
 			},
 			1,
 		),
 		SpriteWalking: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(0, 88, 24, 112)},
-				{Rect: image.Rect(24, 88, 48, 112)},
-				{Rect: image.Rect(48, 88, 72, 112)},
-				{Rect: image.Rect(24, 88, 48, 112)},
+				{I: 0, J: 0},
+				{I: 1, J: 0},
+				{I: 2, J: 0},
+				{I: 1, J: 0},
 			},
 			10,
 		),
 		SpritePushing: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(72, 88, 96, 112)},
-				{Rect: image.Rect(96, 88, 120, 112)},
-				{Rect: image.Rect(120, 88, 144, 112)},
-				{Rect: image.Rect(96, 88, 120, 112)},
+				{I: 3, J: 0},
+				{I: 4, J: 0},
+				{I: 5, J: 0},
+				{I: 4, J: 0},
 			},
 			10,
 		),
 		SpritePushingIdle: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(96, 88, 120, 112)},
+				{I: 4, J: 0},
 			},
 			1,
 		),
-		SpriteBackground: NewSprite(
+		SpriteBackground1: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(0, 16, 8, 24)},
+				{I: 0, J: 4},
 			},
 			1,
 		),
-		SpriteWall: NewSprite(
+		SpriteBackground2: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(0, 112, 24, 136)},
+				{I: 1, J: 4},
 			},
 			1,
 		),
-		SpriteTile: NewSprite(
+		SpriteBackground3: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(8, 16, 16, 24)},
+				{I: 2, J: 4},
 			},
 			1,
 		),
-		SpriteFlag: NewSprite(
+		SpriteBackground4: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(80, 16, 88, 24)},
+				{I: 3, J: 4},
 			},
 			1,
 		),
-		SpriteBox: NewSprite(
+		SpriteBackground5: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(0, 136, 24, 160)},
+				{I: 4, J: 4},
 			},
 			1,
 		),
-		SpriteBoxDone: NewSprite(
+		SpriteBackground6: NewSprite(
 			[]Frame{
-				{Rect: image.Rect(0, 160, 24, 184)},
+				{I: 5, J: 4},
+			},
+			1,
+		),
+		SpriteWall1: NewSprite(
+			[]Frame{
+				{I: 0, J: 1},
+			},
+			1,
+		),
+		SpriteWall2: NewSprite(
+			[]Frame{
+				{I: 1, J: 1},
+			},
+			1,
+		),
+		SpriteWall3: NewSprite(
+			[]Frame{
+				{I: 2, J: 1},
+			},
+			1,
+		),
+		SpriteWall4: NewSprite(
+			[]Frame{
+				{I: 3, J: 1},
+			},
+			1,
+		),
+		SpriteTile1: NewSprite(
+			[]Frame{
+				{I: 0, J: 5},
+			},
+			1,
+		),
+		SpriteTile2: NewSprite(
+			[]Frame{
+				{I: 1, J: 5},
+			},
+			1,
+		),
+		SpriteTile3: NewSprite(
+			[]Frame{
+				{I: 2, J: 5},
+			},
+			1,
+		),
+		SpriteFlag1: NewSprite(
+			[]Frame{
+				{I: 0, J: 6},
+			},
+			1,
+		),
+		SpriteFlag2: NewSprite(
+			[]Frame{
+				{I: 1, J: 6},
+			},
+			1,
+		),
+		SpriteFlag3: NewSprite(
+			[]Frame{
+				{I: 2, J: 6},
+			},
+			1,
+		),
+		SpriteBox1: NewSprite(
+			[]Frame{
+				{I: 0, J: 2},
+			},
+			1,
+		),
+		SpriteBox2: NewSprite(
+			[]Frame{
+				{I: 1, J: 2},
+			},
+			1,
+		),
+		SpriteBox3: NewSprite(
+			[]Frame{
+				{I: 2, J: 2},
+			},
+			1,
+		),
+		SpriteBox4: NewSprite(
+			[]Frame{
+				{I: 3, J: 2},
+			},
+			1,
+		),
+		SpriteBox5: NewSprite(
+			[]Frame{
+				{I: 4, J: 2},
+			},
+			1,
+		),
+		SpriteBoxDone1: NewSprite(
+			[]Frame{
+				{I: 0, J: 3},
+			},
+			1,
+		),
+		SpriteBoxDone2: NewSprite(
+			[]Frame{
+				{I: 1, J: 3},
+			},
+			1,
+		),
+		SpriteBoxDone3: NewSprite(
+			[]Frame{
+				{I: 2, J: 3},
+			},
+			1,
+		),
+		SpriteBoxDone4: NewSprite(
+			[]Frame{
+				{I: 3, J: 3},
+			},
+			1,
+		),
+		SpriteBoxDone5: NewSprite(
+			[]Frame{
+				{I: 4, J: 3},
 			},
 			1,
 		),
