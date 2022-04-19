@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"embed"
 	"math"
 	"strconv"
 
@@ -61,14 +62,18 @@ const (
 )
 
 var (
-	player      *Player
-	boxes       []*Box
-	objects     []*Object
-	sprites     map[SpriteName]*Sprite
-	spriteSheet *ebiten.Image
-	fontImage   *ebiten.Image
-	stageIndex  = 0
-	roomIndex   = 0
+	player     *Player
+	boxes      []*Box
+	objects    []*Object
+	sprites    map[SpriteName]*Sprite
+	stageIndex = 0
+	roomIndex  = 0
+)
+
+var (
+	fontImage    *ebiten.Image
+	playerImage  *ebiten.Image
+	tileSetImage *ebiten.Image
 )
 
 func Scale() float64 {
@@ -278,19 +283,38 @@ func (g *Game) LoadRoom() {
 	}
 }
 
-func New(spriteSheetPNG, fontPNG []byte) (*Game, error) {
-	game1 := Game{}
+func loadImage(assets embed.FS, filename string) (*ebiten.Image, error) {
+	b, err := assets.ReadFile(filename)
+	if err != nil {
+		return nil, errors.Wrap(err, "error on read file from assets")
+	}
 
-	var err error
-
-	spriteSheet, _, err = ebitenutil.NewImageFromReader(bytes.NewReader(spriteSheetPNG))
+	img, _, err := ebitenutil.NewImageFromReader(bytes.NewReader(b))
 	if err != nil {
 		return nil, errors.Wrap(err, "error on new image from file")
 	}
 
-	fontImage, _, err = ebitenutil.NewImageFromReader(bytes.NewReader(fontPNG))
+	return img, nil
+}
+
+func New(assets embed.FS) (*Game, error) {
+	game1 := Game{}
+
+	var err error
+
+	fontImage, err = loadImage(assets, "assets/font.png")
 	if err != nil {
-		return nil, errors.Wrap(err, "error on new image from file")
+		return nil, errors.Wrap(err, "error on load image")
+	}
+
+	playerImage, err = loadImage(assets, "assets/player.png")
+	if err != nil {
+		return nil, errors.Wrap(err, "error on load image")
+	}
+
+	tileSetImage, err = loadImage(assets, "assets/tileset.png")
+	if err != nil {
+		return nil, errors.Wrap(err, "error on load image")
 	}
 
 	sprites = map[SpriteName]*Sprite{
@@ -326,37 +350,37 @@ func New(spriteSheetPNG, fontPNG []byte) (*Game, error) {
 		),
 		SpriteBackground1: NewSprite(
 			[]Frame{
-				{I: 0, J: 4},
+				{I: 0, J: 0},
 			},
 			1,
 		),
 		SpriteBackground2: NewSprite(
 			[]Frame{
-				{I: 1, J: 4},
+				{I: 1, J: 0},
 			},
 			1,
 		),
 		SpriteBackground3: NewSprite(
 			[]Frame{
-				{I: 2, J: 4},
+				{I: 2, J: 0},
 			},
 			1,
 		),
 		SpriteBackground4: NewSprite(
 			[]Frame{
-				{I: 3, J: 4},
+				{I: 3, J: 0},
 			},
 			1,
 		),
 		SpriteBackground5: NewSprite(
 			[]Frame{
-				{I: 4, J: 4},
+				{I: 4, J: 0},
 			},
 			1,
 		),
 		SpriteBackground6: NewSprite(
 			[]Frame{
-				{I: 5, J: 4},
+				{I: 5, J: 0},
 			},
 			1,
 		),
@@ -386,97 +410,97 @@ func New(spriteSheetPNG, fontPNG []byte) (*Game, error) {
 		),
 		SpriteTile1: NewSprite(
 			[]Frame{
-				{I: 0, J: 5},
+				{I: 0, J: 2},
 			},
 			1,
 		),
 		SpriteTile2: NewSprite(
 			[]Frame{
-				{I: 1, J: 5},
+				{I: 1, J: 2},
 			},
 			1,
 		),
 		SpriteTile3: NewSprite(
 			[]Frame{
-				{I: 2, J: 5},
+				{I: 2, J: 2},
 			},
 			1,
 		),
 		SpriteFlag1: NewSprite(
 			[]Frame{
-				{I: 0, J: 6},
+				{I: 0, J: 3},
 			},
 			1,
 		),
 		SpriteFlag2: NewSprite(
 			[]Frame{
-				{I: 1, J: 6},
+				{I: 1, J: 3},
 			},
 			1,
 		),
 		SpriteFlag3: NewSprite(
 			[]Frame{
-				{I: 2, J: 6},
+				{I: 2, J: 3},
 			},
 			1,
 		),
 		SpriteBox1: NewSprite(
 			[]Frame{
-				{I: 0, J: 2},
+				{I: 0, J: 5},
 			},
 			1,
 		),
 		SpriteBox2: NewSprite(
 			[]Frame{
-				{I: 1, J: 2},
+				{I: 1, J: 5},
 			},
 			1,
 		),
 		SpriteBox3: NewSprite(
 			[]Frame{
-				{I: 2, J: 2},
+				{I: 2, J: 5},
 			},
 			1,
 		),
 		SpriteBox4: NewSprite(
 			[]Frame{
-				{I: 3, J: 2},
+				{I: 3, J: 5},
 			},
 			1,
 		),
 		SpriteBox5: NewSprite(
 			[]Frame{
-				{I: 4, J: 2},
+				{I: 4, J: 5},
 			},
 			1,
 		),
 		SpriteBoxDone1: NewSprite(
 			[]Frame{
-				{I: 0, J: 3},
+				{I: 0, J: 6},
 			},
 			1,
 		),
 		SpriteBoxDone2: NewSprite(
 			[]Frame{
-				{I: 1, J: 3},
+				{I: 1, J: 6},
 			},
 			1,
 		),
 		SpriteBoxDone3: NewSprite(
 			[]Frame{
-				{I: 2, J: 3},
+				{I: 2, J: 6},
 			},
 			1,
 		),
 		SpriteBoxDone4: NewSprite(
 			[]Frame{
-				{I: 3, J: 3},
+				{I: 3, J: 6},
 			},
 			1,
 		),
 		SpriteBoxDone5: NewSprite(
 			[]Frame{
-				{I: 4, J: 3},
+				{I: 4, J: 6},
 			},
 			1,
 		),

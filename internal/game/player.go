@@ -310,7 +310,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 
 	currentFrame := sprite.Frames[currentFrameIndex]
 
-	img := ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
+	img := ebiten.NewImageFromImage(playerImage.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
 
 	screen.DrawImage(img, &opts)
 }

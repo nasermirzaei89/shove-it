@@ -57,7 +57,7 @@ func (box *Box) Draw(screen *ebiten.Image) {
 
 	currentFrame := sprites[currentSprite].Frames[0]
 
-	img := ebiten.NewImageFromImage(spriteSheet.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
+	img := ebiten.NewImageFromImage(tileSetImage.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
 
 	screen.DrawImage(img, &opts)
 }
