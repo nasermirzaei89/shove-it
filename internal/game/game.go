@@ -39,11 +39,18 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF5) {
-		loadStage()
+		startStage()
 	}
 
 	return nil
 }
+
+const (
+	stepX  = 2
+	stepY  = 26
+	stageX = 22
+	stageY = 26
+)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	for i := range objects {
@@ -62,8 +69,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// HUD
-	DrawText(screen, 2, 26, fmt.Sprintf("STEP %d", steps))
-	DrawText(screen, 22, 26, fmt.Sprintf("STAGE %s", stages[stageIndex].Name))
+	DrawText(screen, stepX, stepY, fmt.Sprintf("STEP %d", steps))
+	DrawText(screen, stageX, stageY, fmt.Sprintf("STAGE %s", stages[stageIndex].Name))
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -73,31 +80,19 @@ func (g *Game) Layout(int, int) (int, int) {
 func New(assets embed.FS) (*Game, error) {
 	game1 := Game{}
 
-	var err error
-
-	fontImage, err = loadImage(assets, "assets/font.png")
+	err := loadImages(assets)
 	if err != nil {
-		return nil, errors.Wrap(err, "error on load image")
-	}
-
-	playerImage, err = loadImage(assets, "assets/player.png")
-	if err != nil {
-		return nil, errors.Wrap(err, "error on load image")
-	}
-
-	tileSetImage, err = loadImage(assets, "assets/tileset.png")
-	if err != nil {
-		return nil, errors.Wrap(err, "error on load image")
+		return nil, errors.Wrap(err, "error on load Images")
 	}
 
 	loadSprites()
 
-	stages, err = loadStages(assets, "assets/stages")
+	err = loadStages(assets, "assets/stages")
 	if err != nil {
 		return nil, errors.Wrap(err, "error on load stages")
 	}
 
-	loadStage()
+	startStage()
 
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowTitle("Shove It")

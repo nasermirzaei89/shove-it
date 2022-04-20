@@ -6,13 +6,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const characterWidth = 8
+const (
+	characterWidth = 8
+	characterSkip  = 32
+)
 
 // DrawText renders text on screen.
 // x and y are base on 40x28 dimension indexing.
 func DrawText(screen *ebiten.Image, x, y int, text string) {
 	for i, c := range text {
-		cx := (int(c) - 32) * characterWidth
+		cx := (int(c) - characterSkip) * characterWidth
 
 		img := ebiten.NewImageFromImage(fontImage.SubImage(image.Rect(cx, 0, cx+characterWidth, characterWidth)))
 

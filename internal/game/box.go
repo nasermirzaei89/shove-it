@@ -78,3 +78,19 @@ func (box *Box) Draw(screen *ebiten.Image) {
 func (box *Box) Done() bool {
 	return stages[stageIndex].IsFlag(box.I, box.J) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
 }
+
+func (box *Box) IsWallOnLeft() bool {
+	return stages[stageIndex].IsWall(box.I-1, box.J)
+}
+
+func (box *Box) IsWallOnRight() bool {
+	return stages[stageIndex].IsWall(box.I+1, box.J)
+}
+
+func (box *Box) IsWallOnTop() bool {
+	return stages[stageIndex].IsWall(box.I, box.J-1)
+}
+
+func (box *Box) IsWallOnBottom() bool {
+	return stages[stageIndex].IsWall(box.I, box.J+1)
+}

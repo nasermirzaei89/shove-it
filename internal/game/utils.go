@@ -22,6 +22,15 @@ const (
 	screenWidth   = 320
 	screenHeight  = 224
 	scaleFactor   = 3
+	defaultSizeX  = 14
+	defaultSizeY  = 10
+)
+
+const (
+	directionRight = 0
+	directionDown  = .5 * math.Pi
+	directionLeft  = math.Pi
+	directionUp    = 1.5 * math.Pi
 )
 
 type SpriteName string
@@ -81,14 +90,8 @@ var (
 )
 
 func Scale() float64 {
-	// 336 => 14
-	// x(288)   => 12
-	// x * y = 336
-	scaleX := float64(scaleFactor*14) / float64(stages[stageIndex].TMX.Width)
-	// 240 => 10
-	// x(288)   => 12
-	// x * y = 240
-	scaleY := float64(scaleFactor*10) / float64(stages[stageIndex].TMX.Height)
+	scaleX := float64(scaleFactor*defaultSizeX) / float64(stages[stageIndex].TMX.Width)
+	scaleY := float64(scaleFactor*defaultSizeY) / float64(stages[stageIndex].TMX.Height)
 
 	return math.Min(scaleX, scaleY)
 }
@@ -107,7 +110,7 @@ func createPlayerAt(i, j int) {
 		PositionY:     float64(j * tileWidth),
 		I:             i,
 		J:             j,
-		direction:     270,
+		direction:     directionUp,
 		animation:     0,
 		currentSprite: SpriteIdle,
 		idle:          true,
@@ -141,10 +144,10 @@ func loadImage(assets embed.FS, filename string) (*ebiten.Image, error) {
 	return img, nil
 }
 
-func loadStages(assets embed.FS, dir string) ([]Stage, error) {
+func loadStages(assets embed.FS, dir string) error {
 	entries, err := assets.ReadDir(dir)
 	if err != nil {
-		return nil, errors.Wrap(err, "error on read directory")
+		return errors.Wrap(err, "error on read directory")
 	}
 
 	res := make([]Stage, 0)
@@ -157,7 +160,7 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 
 		f, err := assets.Open(dir + "/" + entry.Name())
 		if err != nil {
-			return nil, errors.Wrap(err, "error on open file")
+			return errors.Wrap(err, "error on open file")
 		}
 
 		defer func() { _ = f.Close() }()
@@ -166,14 +169,14 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 
 		err = xml.NewDecoder(f).Decode(&tmx)
 		if err != nil {
-			return nil, errors.Wrap(err, "error on decode tmx file")
+			return errors.Wrap(err, "error on decode tmx file")
 		}
 
 		csvReader := csv.NewReader(bytes.NewBufferString(strings.ReplaceAll(tmx.Data, ",\n", "\n")))
 
 		records, err := csvReader.ReadAll()
 		if err != nil {
-			return nil, errors.Wrap(err, "error on read all from csv reader")
+			return errors.Wrap(err, "error on read all from csv reader")
 		}
 
 		data := make([][]int, len(records))
@@ -183,7 +186,7 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 			for i := range records[j] {
 				v, err := strconv.Atoi(records[j][i])
 				if err != nil {
-					return nil, errors.Wrap(err, "error on convert string to int")
+					return errors.Wrap(err, "error on convert string to int")
 				}
 
 				data[j][i] = v
@@ -204,7 +207,9 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 		return a < b
 	})
 
-	return res, nil
+	stages = res
+
+	return nil
 }
 
 func nextStage() {
@@ -214,7 +219,7 @@ func nextStage() {
 		stageIndex = 0
 	}
 
-	loadStage()
+	startStage()
 }
 
 func prevStage() {
@@ -224,10 +229,10 @@ func prevStage() {
 		stageIndex = len(stages) - 1
 	}
 
-	loadStage()
+	startStage()
 }
 
-func loadStage() {
+func startStage() {
 	data := stages[stageIndex].Data
 
 	objects = make([]*Object, 0)
