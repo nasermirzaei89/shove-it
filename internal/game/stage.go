@@ -59,8 +59,17 @@ func (stg Stage) ValueAt(i, j int) int {
 }
 
 func (stg Stage) IsWall(i, j int) bool {
-	switch stg.Data[j][i] {
+	switch stg.ValueAt(i, j) {
 	case ItemWall1, ItemWall2, ItemWall3, ItemWall4:
+		return true
+	default:
+		return false
+	}
+}
+
+func (stg Stage) IsFlag(i, j int) bool {
+	switch stg.ValueAt(i, j) {
+	case ItemTileFlagged1, ItemTileFlagged2, ItemTileFlagged3, ItemBoxDone1, ItemBoxDone2, ItemBoxDone3, ItemBoxDone4, ItemBoxDone5:
 		return true
 	default:
 		return false
