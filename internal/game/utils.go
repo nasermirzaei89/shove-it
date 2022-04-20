@@ -96,9 +96,9 @@ func Scale() float64 {
 	return math.Min(scaleX, scaleY)
 }
 
-func createObjectAt(sn SpriteName, i, j int) {
+func createObjectAt(spriteName SpriteName, i, j int) {
 	objects = append(objects, &Object{
-		Sprite:    sn,
+		Sprite:    spriteName,
 		PositionX: float64(i * tileWidth),
 		PositionY: float64(j * tileWidth),
 	})
@@ -120,13 +120,13 @@ func createPlayerAt(i, j int) {
 	}
 }
 
-func createBoxAt(sn SpriteName, i, j int) {
+func createBoxAt(spriteName SpriteName, i, j int) {
 	boxes = append(boxes, &Box{
 		PositionX:  float64(i * tileWidth),
 		PositionY:  float64(j * tileWidth),
 		I:          i,
 		J:          j,
-		SpriteName: sn,
+		SpriteName: spriteName,
 	})
 }
 
@@ -158,16 +158,16 @@ func loadStages(assets embed.FS, dir string) error {
 			continue
 		}
 
-		f, err := assets.Open(dir + "/" + entry.Name())
+		file, err := assets.Open(dir + "/" + entry.Name())
 		if err != nil {
 			return errors.Wrap(err, "error on open file")
 		}
 
-		defer func() { _ = f.Close() }()
+		defer func() { _ = file.Close() }()
 
 		var tmx TMX
 
-		err = xml.NewDecoder(f).Decode(&tmx)
+		err = xml.NewDecoder(file).Decode(&tmx)
 		if err != nil {
 			return errors.Wrap(err, "error on decode tmx file")
 		}
@@ -232,15 +232,9 @@ func prevStage() {
 	startStage()
 }
 
-func startStage() {
+func getThemes() (tileTheme, flagTheme SpriteName) {
 	data := stages[stageIndex].Data
 
-	objects = make([]*Object, 0)
-	boxes = make([]*Box, 0)
-
-	var tileTheme, flagTheme SpriteName
-
-L1:
 	for j := range data {
 		for i := range data[j] {
 			switch data[j][i] {
@@ -248,20 +242,31 @@ L1:
 				tileTheme = SpriteTile1
 				flagTheme = SpriteFlag1
 
-				break L1
+				return
 			case ItemTile2:
 				tileTheme = SpriteTile2
 				flagTheme = SpriteFlag2
 
-				break L1
+				return
 			case ItemTile3:
 				tileTheme = SpriteTile3
 				flagTheme = SpriteFlag3
 
-				break L1
+				return
 			}
 		}
 	}
+
+	return
+}
+
+func startStage() {
+	data := stages[stageIndex].Data
+
+	objects = make([]*Object, 0)
+	boxes = make([]*Box, 0)
+
+	tileTheme, flagTheme := getThemes()
 
 	for j := range data {
 		for i := range data[j] {
