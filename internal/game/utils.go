@@ -115,8 +115,8 @@ func createPlayerAt(i, j int) {
 		currentSprite: SpriteIdle,
 		idle:          true,
 		pushing:       false,
-		history:       []int{},
-		boxHistory:    []int{},
+		history:       make([]int, 0),
+		boxHistory:    make([]*Box, 0),
 	}
 }
 

@@ -16,7 +16,7 @@ type Player struct {
 	idle                 bool
 	pushing              bool
 	history              []int
-	boxHistory           []int
+	boxHistory           []*Box
 }
 
 const (
@@ -43,47 +43,83 @@ func (p *Player) SetCurrentSprite(sprite SpriteName) {
 	}
 }
 
-func (p *Player) IsWallOnLeft() bool {
+func (p *Player) IsWallAtLeft() bool {
 	return stages[stageIndex].IsWall(p.I-1, p.J)
 }
 
-func (p *Player) IsWallOnRight() bool {
+func (p *Player) IsWallAtRight() bool {
 	return stages[stageIndex].IsWall(p.I+1, p.J)
 }
 
-func (p *Player) IsWallOnTop() bool {
+func (p *Player) IsWallAtTop() bool {
 	return stages[stageIndex].IsWall(p.I, p.J-1)
 }
 
-func (p *Player) IsWallOnBottom() bool {
+func (p *Player) IsWallAtBottom() bool {
 	return stages[stageIndex].IsWall(p.I, p.J+1)
 }
 
+func (p *Player) BoxAtLeft() *Box {
+	for i := range boxes {
+		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
+			return boxes[i]
+		}
+	}
+
+	return nil
+}
+
+func (p *Player) BoxAtRight() *Box {
+	for i := range boxes {
+		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
+			return boxes[i]
+		}
+	}
+
+	return nil
+}
+
+func (p *Player) BoxAtTop() *Box {
+	for i := range boxes {
+		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
+			return boxes[i]
+		}
+	}
+
+	return nil
+}
+
+func (p *Player) BoxAtBottom() *Box {
+	for i := range boxes {
+		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
+			return boxes[i]
+		}
+	}
+
+	return nil
+}
+
 func (p *Player) checkLeft() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || p.IsWallOnLeft() {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || p.IsWallAtLeft() {
 		return
 	}
 
 	pushing := false
 
-	for i := range boxes {
-		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
-			if boxes[i].IsWallOnLeft() {
-				return
-			}
-
-			for j := range boxes {
-				if boxes[j].I == p.I-2 && boxes[j].J == p.J {
-					return
-				}
-			}
-
-			pushing = true
-
-			boxes[i].I--
-
-			p.boxHistory = append(p.boxHistory, i)
+	if box := p.BoxAtLeft(); box != nil {
+		if box.IsWallAtLeft() {
+			return
 		}
+
+		if box.IsBoxAtLeft() {
+			return
+		}
+
+		pushing = true
+
+		box.I--
+
+		p.boxHistory = append(p.boxHistory, box)
 	}
 
 	p.I--
@@ -93,35 +129,31 @@ func (p *Player) checkLeft() {
 	p.history = append(p.history, moveLeft)
 
 	if !pushing {
-		p.boxHistory = append(p.boxHistory, -1)
+		p.boxHistory = append(p.boxHistory, nil)
 	}
 }
 
 func (p *Player) checkRight() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || p.IsWallOnRight() {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || p.IsWallAtRight() {
 		return
 	}
 
 	pushing := false
 
-	for i := range boxes {
-		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
-			if boxes[i].IsWallOnRight() {
-				return
-			}
-
-			for j := range boxes {
-				if boxes[j].I == p.I+2 && boxes[j].J == p.J {
-					return
-				}
-			}
-
-			pushing = true
-
-			boxes[i].I++
-
-			p.boxHistory = append(p.boxHistory, i)
+	if box := p.BoxAtRight(); box != nil {
+		if box.IsWallAtRight() {
+			return
 		}
+
+		if box.IsBoxAtRight() {
+			return
+		}
+
+		pushing = true
+
+		box.I++
+
+		p.boxHistory = append(p.boxHistory, box)
 	}
 
 	p.I++
@@ -131,35 +163,31 @@ func (p *Player) checkRight() {
 	p.history = append(p.history, moveRight)
 
 	if !pushing {
-		p.boxHistory = append(p.boxHistory, -1)
+		p.boxHistory = append(p.boxHistory, nil)
 	}
 }
 
 func (p *Player) checkUp() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || p.IsWallOnTop() {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || p.IsWallAtTop() {
 		return
 	}
 
 	pushing := false
 
-	for i := range boxes {
-		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
-			if boxes[i].IsWallOnTop() {
-				return
-			}
-
-			for j := range boxes {
-				if boxes[j].I == p.I && boxes[j].J == p.J-2 {
-					return
-				}
-			}
-
-			pushing = true
-
-			boxes[i].J--
-
-			p.boxHistory = append(p.boxHistory, i)
+	if box := p.BoxAtTop(); box != nil {
+		if box.IsWallAtTop() {
+			return
 		}
+
+		if box.IsBoxAtTop() {
+			return
+		}
+
+		pushing = true
+
+		box.J--
+
+		p.boxHistory = append(p.boxHistory, box)
 	}
 
 	p.J--
@@ -169,35 +197,31 @@ func (p *Player) checkUp() {
 	p.history = append(p.history, moveUp)
 
 	if !pushing {
-		p.boxHistory = append(p.boxHistory, -1)
+		p.boxHistory = append(p.boxHistory, nil)
 	}
 }
 
 func (p *Player) checkDown() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || p.IsWallOnBottom() {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || p.IsWallAtBottom() {
 		return
 	}
 
 	pushing := false
 
-	for i := range boxes {
-		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
-			if boxes[i].IsWallOnBottom() {
-				return
-			}
-
-			for j := range boxes {
-				if boxes[j].I == p.I && boxes[j].J == p.J+2 {
-					return
-				}
-			}
-
-			pushing = true
-
-			boxes[i].J++
-
-			p.boxHistory = append(p.boxHistory, i)
+	if box := p.BoxAtBottom(); box != nil {
+		if box.IsWallAtBottom() {
+			return
 		}
+
+		if box.IsBoxAtBottom() {
+			return
+		}
+
+		pushing = true
+
+		box.J++
+
+		p.boxHistory = append(p.boxHistory, box)
 	}
 
 	p.J++
@@ -208,7 +232,7 @@ func (p *Player) checkDown() {
 	p.history = append(p.history, moveDown)
 
 	if !pushing {
-		p.boxHistory = append(p.boxHistory, -1)
+		p.boxHistory = append(p.boxHistory, nil)
 	}
 }
 
@@ -224,33 +248,33 @@ func (p *Player) checkUndo() {
 		p.I++
 		p.direction = directionLeft
 
-		if p.boxHistory[len(p.history)-1] != -1 {
+		if p.boxHistory[len(p.history)-1] != nil {
 			pushing = true
-			boxes[p.boxHistory[len(p.history)-1]].I++
+			p.boxHistory[len(p.history)-1].I++
 		}
 	case moveRight:
 		p.I--
 		p.direction = directionRight
 
-		if p.boxHistory[len(p.history)-1] != -1 {
+		if p.boxHistory[len(p.history)-1] != nil {
 			pushing = true
-			boxes[p.boxHistory[len(p.history)-1]].I--
+			p.boxHistory[len(p.history)-1].I--
 		}
 	case moveUp:
 		p.J++
 		p.direction = directionUp
 
-		if p.boxHistory[len(p.history)-1] != -1 {
+		if p.boxHistory[len(p.history)-1] != nil {
 			pushing = true
-			boxes[p.boxHistory[len(p.history)-1]].J++
+			p.boxHistory[len(p.history)-1].J++
 		}
 	case moveDown:
 		p.J--
 		p.direction = directionDown
 
-		if p.boxHistory[len(p.history)-1] != -1 {
+		if p.boxHistory[len(p.history)-1] != nil {
 			pushing = true
-			boxes[p.boxHistory[len(p.history)-1]].J--
+			p.boxHistory[len(p.history)-1].J--
 		}
 	}
 

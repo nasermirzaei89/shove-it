@@ -79,18 +79,58 @@ func (box *Box) Done() bool {
 	return stages[stageIndex].IsFlag(box.I, box.J) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
 }
 
-func (box *Box) IsWallOnLeft() bool {
+func (box *Box) IsWallAtLeft() bool {
 	return stages[stageIndex].IsWall(box.I-1, box.J)
 }
 
-func (box *Box) IsWallOnRight() bool {
+func (box *Box) IsWallAtRight() bool {
 	return stages[stageIndex].IsWall(box.I+1, box.J)
 }
 
-func (box *Box) IsWallOnTop() bool {
+func (box *Box) IsWallAtTop() bool {
 	return stages[stageIndex].IsWall(box.I, box.J-1)
 }
 
-func (box *Box) IsWallOnBottom() bool {
+func (box *Box) IsWallAtBottom() bool {
 	return stages[stageIndex].IsWall(box.I, box.J+1)
+}
+
+func (box *Box) IsBoxAtLeft() bool {
+	for j := range boxes {
+		if boxes[j].I == box.I-1 && boxes[j].J == box.J {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (box *Box) IsBoxAtRight() bool {
+	for j := range boxes {
+		if boxes[j].I == box.I+1 && boxes[j].J == box.J {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (box *Box) IsBoxAtTop() bool {
+	for j := range boxes {
+		if boxes[j].I == box.I && boxes[j].J == box.J-1 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (box *Box) IsBoxAtBottom() bool {
+	for j := range boxes {
+		if boxes[j].I == box.I && boxes[j].J == box.J+1 {
+			return true
+		}
+	}
+
+	return false
 }
