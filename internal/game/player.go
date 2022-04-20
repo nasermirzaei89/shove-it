@@ -46,7 +46,7 @@ func (p *Player) SetCurrentSprite(sprite SpriteName) {
 }
 
 func (p *Player) checkLeft() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || stages[stageIndex].ValueAt(p.I-1, p.J) == ItemWall1 {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || stages[stageIndex].IsWall(p.I-1, p.J) {
 		return
 	}
 
@@ -54,7 +54,7 @@ func (p *Player) checkLeft() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
-			if stages[stageIndex].ValueAt(p.I-2, p.J) == ItemWall1 {
+			if stages[stageIndex].IsWall(p.I-2, p.J) {
 				return
 			}
 
@@ -84,7 +84,7 @@ func (p *Player) checkLeft() {
 }
 
 func (p *Player) checkRight() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || stages[stageIndex].ValueAt(p.I+1, p.J) == ItemWall1 {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || stages[stageIndex].IsWall(p.I+1, p.J) {
 		return
 	}
 
@@ -92,7 +92,7 @@ func (p *Player) checkRight() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
-			if stages[stageIndex].ValueAt(p.I+2, p.J) == ItemWall1 {
+			if stages[stageIndex].IsWall(p.I+2, p.J) {
 				return
 			}
 
@@ -122,7 +122,7 @@ func (p *Player) checkRight() {
 }
 
 func (p *Player) checkUp() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || stages[stageIndex].ValueAt(p.I, p.J-1) == ItemWall1 {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || stages[stageIndex].IsWall(p.I, p.J-1) {
 		return
 	}
 
@@ -130,7 +130,7 @@ func (p *Player) checkUp() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
-			if stages[stageIndex].ValueAt(p.I, p.J-2) == ItemWall1 {
+			if stages[stageIndex].IsWall(p.I, p.J-2) {
 				return
 			}
 
@@ -160,7 +160,7 @@ func (p *Player) checkUp() {
 }
 
 func (p *Player) checkDown() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || stages[stageIndex].ValueAt(p.I, p.J+1) == ItemWall1 {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || stages[stageIndex].IsWall(p.I, p.J+1) {
 		return
 	}
 
@@ -168,7 +168,7 @@ func (p *Player) checkDown() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
-			if stages[stageIndex].ValueAt(p.I, p.J+2) == ItemWall1 {
+			if stages[stageIndex].IsWall(p.I, p.J+2) {
 				return
 			}
 

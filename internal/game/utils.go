@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"math"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -92,41 +93,15 @@ func Scale() float64 {
 	return math.Min(scaleX, scaleY)
 }
 
-func createBackgroundAt(i, j int) {
+func createObjectAt(sn SpriteName, i, j int) {
 	objects = append(objects, &Object{
-		Sprite:    SpriteBackground1,
-		PositionX: float64(i * tileWidth),
-		PositionY: float64(j * tileWidth),
-	})
-}
-
-func createWallAt(i, j int) {
-	objects = append(objects, &Object{
-		Sprite:    SpriteWall1,
-		PositionX: float64(i * tileWidth),
-		PositionY: float64(j * tileWidth),
-	})
-}
-
-func createTileAt(i, j int) {
-	objects = append(objects, &Object{
-		Sprite:    SpriteTile1,
-		PositionX: float64(i * tileWidth),
-		PositionY: float64(j * tileWidth),
-	})
-}
-
-func createFlaggedTileAt(i, j int) {
-	objects = append(objects, &Object{
-		Sprite:    SpriteFlag1,
+		Sprite:    sn,
 		PositionX: float64(i * tileWidth),
 		PositionY: float64(j * tileWidth),
 	})
 }
 
 func createPlayerAt(i, j int) {
-	createTileAt(i, j)
-
 	player = &Player{
 		PositionX:     float64(i * tileWidth),
 		PositionY:     float64(j * tileWidth),
@@ -142,25 +117,13 @@ func createPlayerAt(i, j int) {
 	}
 }
 
-func createBoxAt(i, j int) {
-	createTileAt(i, j)
-
+func createBoxAt(sn SpriteName, i, j int) {
 	boxes = append(boxes, &Box{
-		PositionX: float64(i * tileWidth),
-		PositionY: float64(j * tileWidth),
-		I:         i,
-		J:         j,
-	})
-}
-
-func createBoxDoneAt(i, j int) {
-	createFlaggedTileAt(i, j)
-
-	boxes = append(boxes, &Box{
-		PositionX: float64(i * tileWidth),
-		PositionY: float64(j * tileWidth),
-		I:         i,
-		J:         j,
+		PositionX:  float64(i * tileWidth),
+		PositionY:  float64(j * tileWidth),
+		I:          i,
+		J:          j,
+		SpriteName: sn,
 	})
 }
 
@@ -234,6 +197,13 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 		})
 	}
 
+	sort.SliceStable(res, func(i, j int) bool {
+		a, _ := strconv.Atoi(res[i].Name)
+		b, _ := strconv.Atoi(res[j].Name)
+
+		return a < b
+	})
+
 	return res, nil
 }
 
@@ -263,23 +233,103 @@ func loadStage() {
 	objects = make([]*Object, 0)
 	boxes = make([]*Box, 0)
 
+	var tileTheme, flagTheme SpriteName
+
+L1:
+	for j := range data {
+		for i := range data[j] {
+			switch data[j][i] {
+			case ItemTile1:
+				tileTheme = SpriteTile1
+				flagTheme = SpriteFlag1
+
+				break L1
+			case ItemTile2:
+				tileTheme = SpriteTile2
+				flagTheme = SpriteFlag2
+
+				break L1
+			case ItemTile3:
+				tileTheme = SpriteTile3
+				flagTheme = SpriteFlag3
+
+				break L1
+			}
+		}
+	}
+
 	for j := range data {
 		for i := range data[j] {
 			switch data[j][i] {
 			case ItemBackground1:
-				createBackgroundAt(i, j)
+				createObjectAt(SpriteBackground1, i, j)
+			case ItemBackground2:
+				createObjectAt(SpriteBackground2, i, j)
+			case ItemBackground3:
+				createObjectAt(SpriteBackground3, i, j)
+			case ItemBackground4:
+				createObjectAt(SpriteBackground4, i, j)
+			case ItemBackground5:
+				createObjectAt(SpriteBackground5, i, j)
 			case ItemWall1:
-				createWallAt(i, j)
+				createObjectAt(SpriteWall1, i, j)
+			case ItemWall2:
+				createObjectAt(SpriteWall2, i, j)
+			case ItemWall3:
+				createObjectAt(SpriteWall3, i, j)
+			case ItemWall4:
+				createObjectAt(SpriteWall4, i, j)
 			case ItemTile1:
-				createTileAt(i, j)
+				createObjectAt(SpriteTile1, i, j)
+			case ItemTile2:
+				createObjectAt(SpriteTile2, i, j)
+			case ItemTile3:
+				createObjectAt(SpriteTile3, i, j)
 			case ItemTileFlagged1:
-				createFlaggedTileAt(i, j)
-			case ItemPlayer1, ItemPlayer2, ItemPlayer3:
+				createObjectAt(SpriteFlag1, i, j)
+			case ItemTileFlagged2:
+				createObjectAt(SpriteFlag2, i, j)
+			case ItemTileFlagged3:
+				createObjectAt(SpriteFlag3, i, j)
+			case ItemPlayer1:
+				createObjectAt(SpriteTile1, i, j)
+				createPlayerAt(i, j)
+			case ItemPlayer2:
+				createObjectAt(SpriteTile2, i, j)
+				createPlayerAt(i, j)
+			case ItemPlayer3:
+				createObjectAt(SpriteTile3, i, j)
 				createPlayerAt(i, j)
 			case ItemBox1:
-				createBoxAt(i, j)
+				createObjectAt(tileTheme, i, j)
+				createBoxAt(SpriteBox1, i, j)
+			case ItemBox2:
+				createObjectAt(tileTheme, i, j)
+				createBoxAt(SpriteBox2, i, j)
+			case ItemBox3:
+				createObjectAt(tileTheme, i, j)
+				createBoxAt(SpriteBox3, i, j)
+			case ItemBox4:
+				createObjectAt(tileTheme, i, j)
+				createBoxAt(SpriteBox4, i, j)
+			case ItemBox5:
+				createObjectAt(tileTheme, i, j)
+				createBoxAt(SpriteBox5, i, j)
 			case ItemBoxDone1:
-				createBoxDoneAt(i, j)
+				createObjectAt(flagTheme, i, j)
+				createBoxAt(SpriteBox1, i, j)
+			case ItemBoxDone2:
+				createObjectAt(flagTheme, i, j)
+				createBoxAt(SpriteBox2, i, j)
+			case ItemBoxDone3:
+				createObjectAt(flagTheme, i, j)
+				createBoxAt(SpriteBox3, i, j)
+			case ItemBoxDone4:
+				createObjectAt(flagTheme, i, j)
+				createBoxAt(SpriteBox4, i, j)
+			case ItemBoxDone5:
+				createObjectAt(flagTheme, i, j)
+				createBoxAt(SpriteBox5, i, j)
 			}
 		}
 	}

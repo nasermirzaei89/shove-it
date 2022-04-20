@@ -10,6 +10,7 @@ import (
 type Box struct {
 	PositionX, PositionY float64
 	I, J                 int
+	SpriteName           SpriteName
 }
 
 func (box Box) DesiredX() float64 {
@@ -50,9 +51,21 @@ func (box *Box) Draw(screen *ebiten.Image) {
 
 	opts.GeoM.Translate(box.PositionX*Scale(), box.PositionY*Scale())
 
-	currentSprite := SpriteBox1
+	currentSprite := box.SpriteName
+
 	if box.Done() {
-		currentSprite = SpriteBoxDone1
+		switch {
+		case box.SpriteName == SpriteBox1:
+			currentSprite = SpriteBoxDone1
+		case box.SpriteName == SpriteBox2:
+			currentSprite = SpriteBoxDone2
+		case box.SpriteName == SpriteBox3:
+			currentSprite = SpriteBoxDone3
+		case box.SpriteName == SpriteBox4:
+			currentSprite = SpriteBoxDone4
+		case box.SpriteName == SpriteBox5:
+			currentSprite = SpriteBoxDone5
+		}
 	}
 
 	currentFrame := sprites[currentSprite].Frames[0]

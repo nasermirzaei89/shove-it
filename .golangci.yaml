@@ -16,5 +16,6 @@ linters:
     - varnamelen
     - gochecknoglobals
     - cyclop
+    - gocyclo
     - funlen
     - dupl

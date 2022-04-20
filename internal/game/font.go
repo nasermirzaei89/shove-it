@@ -10,11 +10,7 @@ const characterWidth = 8
 
 // DrawText renders text on screen.
 // x and y are base on 40x28 dimension indexing.
-func DrawText(screen *ebiten.Image, x, y int, text string, alignRight bool) {
-	if alignRight {
-		x -= len(text)
-	}
-
+func DrawText(screen *ebiten.Image, x, y int, text string) {
 	for i, c := range text {
 		cx := (int(c) - 32) * characterWidth
 

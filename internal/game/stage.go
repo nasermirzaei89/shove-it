@@ -57,3 +57,12 @@ func (stg Stage) Height() int {
 func (stg Stage) ValueAt(i, j int) int {
 	return stg.Data[j][i]
 }
+
+func (stg Stage) IsWall(i, j int) bool {
+	switch stg.Data[j][i] {
+	case ItemWall1, ItemWall2, ItemWall3, ItemWall4:
+		return true
+	default:
+		return false
+	}
+}
