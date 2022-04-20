@@ -46,7 +46,7 @@ func (p *Player) SetCurrentSprite(sprite SpriteName) {
 }
 
 func (p *Player) checkLeft() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || CurrentRoomData()[p.J][p.I-1] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || stages[stageIndex].ValueAt(p.I-1, p.J) == ItemWall1 {
 		return
 	}
 
@@ -54,7 +54,7 @@ func (p *Player) checkLeft() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
-			if CurrentRoomData()[p.J][p.I-2] == ItemWall {
+			if stages[stageIndex].ValueAt(p.I-2, p.J) == ItemWall1 {
 				return
 			}
 
@@ -84,7 +84,7 @@ func (p *Player) checkLeft() {
 }
 
 func (p *Player) checkRight() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || CurrentRoomData()[p.J][p.I+1] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || stages[stageIndex].ValueAt(p.I+1, p.J) == ItemWall1 {
 		return
 	}
 
@@ -92,7 +92,7 @@ func (p *Player) checkRight() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
-			if CurrentRoomData()[p.J][p.I+2] == ItemWall {
+			if stages[stageIndex].ValueAt(p.I+2, p.J) == ItemWall1 {
 				return
 			}
 
@@ -122,7 +122,7 @@ func (p *Player) checkRight() {
 }
 
 func (p *Player) checkUp() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || CurrentRoomData()[p.J-1][p.I] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || stages[stageIndex].ValueAt(p.I, p.J-1) == ItemWall1 {
 		return
 	}
 
@@ -130,7 +130,7 @@ func (p *Player) checkUp() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
-			if CurrentRoomData()[p.J-2][p.I] == ItemWall {
+			if stages[stageIndex].ValueAt(p.I, p.J-2) == ItemWall1 {
 				return
 			}
 
@@ -160,7 +160,7 @@ func (p *Player) checkUp() {
 }
 
 func (p *Player) checkDown() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || CurrentRoomData()[p.J+1][p.I] == ItemWall {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || stages[stageIndex].ValueAt(p.I, p.J+1) == ItemWall1 {
 		return
 	}
 
@@ -168,7 +168,7 @@ func (p *Player) checkDown() {
 
 	for i := range boxes {
 		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
-			if CurrentRoomData()[p.J+2][p.I] == ItemWall {
+			if stages[stageIndex].ValueAt(p.I, p.J+2) == ItemWall1 {
 				return
 			}
 

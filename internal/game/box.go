@@ -63,5 +63,5 @@ func (box *Box) Draw(screen *ebiten.Image) {
 }
 
 func (box *Box) Done() bool {
-	return (CurrentRoomData()[box.J][box.I] == ItemTileFlagged || CurrentRoomData()[box.J][box.I] == ItemBoxDone) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
+	return (stages[stageIndex].ValueAt(box.I, box.J) == ItemTileFlagged1 || stages[stageIndex].ValueAt(box.I, box.J) == ItemBoxDone1) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
 }
