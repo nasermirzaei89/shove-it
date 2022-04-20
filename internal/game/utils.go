@@ -155,7 +155,7 @@ func loadStages(assets embed.FS, dir string) ([]Stage, error) {
 			continue
 		}
 
-		f, err := assets.Open(filepath.Join(dir, entry.Name()))
+		f, err := assets.Open(dir + "/" + entry.Name())
 		if err != nil {
 			return nil, errors.Wrap(err, "error on open file")
 		}
