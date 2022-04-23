@@ -11,19 +11,23 @@ const (
 	characterSkip  = 32
 )
 
+var fontCache = make(map[int32]*ebiten.Image)
+
 // DrawText renders text on screen.
 // x and y are base on 40x28 dimension indexing.
 func DrawText(screen *ebiten.Image, x, y int, text string) {
 	for i, c := range text {
-		cx := (int(c) - characterSkip) * characterWidth
+		if _, ok := fontCache[c]; !ok {
+			cx := (int(c) - characterSkip) * characterWidth
 
-		img := ebiten.NewImageFromImage(fontImage.SubImage(image.Rect(cx, 0, cx+characterWidth, characterWidth)))
+			fontCache[c] = ebiten.NewImageFromImage(fontImage.SubImage(image.Rect(cx, 0, cx+characterWidth, characterWidth)))
+		}
 
 		opts := new(ebiten.DrawImageOptions)
 
 		opts.GeoM.Scale(scaleFactor, scaleFactor)
 		opts.GeoM.Translate(float64(x+i)*characterWidth*scaleFactor, float64(y)*characterWidth*scaleFactor)
 
-		screen.DrawImage(img, opts)
+		screen.DrawImage(fontCache[c], opts)
 	}
 }

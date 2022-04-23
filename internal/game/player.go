@@ -1,7 +1,6 @@
 package game
 
 import (
-	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -344,11 +343,9 @@ func (p *Player) Draw(screen *ebiten.Image) {
 
 	p.animation += 1.0 / fps
 
-	currentFrameIndex := int(p.animation/(1/sprite.Speed)) % len(sprite.Frames)
+	currentFrameIndex := int(p.animation/(1/sprite.Speed)) % len(sprite.Images)
 
-	currentFrame := sprite.Frames[currentFrameIndex]
-
-	img := ebiten.NewImageFromImage(playerImage.SubImage(image.Rect(currentFrame.I*tileWidth, currentFrame.J*tileWidth, currentFrame.I*tileWidth+tileWidth, currentFrame.J*tileWidth+tileWidth)))
+	img := sprite.Images[currentFrameIndex]
 
 	screen.DrawImage(img, &opts)
 }
