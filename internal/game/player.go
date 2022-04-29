@@ -297,6 +297,8 @@ func (p *Player) Update() {
 		} else {
 			p.PositionX += movementSpeed
 		}
+
+		shouldDraw = true
 	}
 
 	if p.DesiredY() != p.PositionY {
@@ -305,10 +307,14 @@ func (p *Player) Update() {
 		} else {
 			p.PositionY += movementSpeed
 		}
+
+		shouldDraw = true
 	}
 
 	if !p.idle && p.PositionX == p.DesiredX() && p.PositionY == p.DesiredY() {
 		p.idle = true
+
+		shouldDraw = true
 	}
 }
 

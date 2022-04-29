@@ -343,4 +343,6 @@ func startStage() {
 			}
 		}
 	}
+
+	shouldDraw = true
 }

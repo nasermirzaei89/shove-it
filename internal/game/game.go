@@ -3,11 +3,15 @@ package game
 import (
 	"embed"
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/pkg/errors"
 )
+
+var shouldDraw bool
 
 type Game struct{}
 
@@ -53,6 +57,12 @@ const (
 )
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if !shouldDraw {
+		ebitenutil.DrawLine(screen, 0, 0, -1, -1, color.Black)
+
+		return
+	}
+
 	for i := range objects {
 		objects[i].Draw(screen)
 	}
@@ -71,6 +81,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// HUD
 	DrawText(screen, stepX, stepY, fmt.Sprintf("STEP %d", steps))
 	DrawText(screen, stageX, stageY, fmt.Sprintf("STAGE %s", stages[stageIndex].Name))
+
+	shouldDraw = false
 }
 
 func (g *Game) Layout(int, int) (int, int) {
@@ -98,6 +110,8 @@ func New(assets embed.FS) (*Game, error) {
 	ebiten.SetWindowTitle("Shove It")
 	ebiten.SetRunnableOnUnfocused(false)
 	ebiten.SetWindowSize(screenWidth*scaleFactor, screenHeight*scaleFactor)
+	ebiten.SetScreenClearedEveryFrame(false)
+	ebiten.SetScreenTransparent(false)
 
 	return &game1, nil
 }

@@ -27,6 +27,8 @@ func (box *Box) Update() {
 		} else {
 			box.PositionX += movementSpeed
 		}
+
+		shouldDraw = true
 	}
 
 	if box.DesiredY() != box.PositionY {
@@ -35,6 +37,8 @@ func (box *Box) Update() {
 		} else {
 			box.PositionY += movementSpeed
 		}
+
+		shouldDraw = true
 	}
 }
 
