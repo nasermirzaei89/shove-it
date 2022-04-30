@@ -11,39 +11,52 @@ import (
 	"github.com/pkg/errors"
 )
 
-var shouldDraw bool
+type Game struct {
+	fontImage    *ebiten.Image
+	playerImage  *ebiten.Image
+	tileSetImage *ebiten.Image
 
-type Game struct{}
+	fontCache map[int32]*ebiten.Image
 
-func (g *Game) Update() error {
+	player     *Player
+	boxes      []*Box
+	objects    []*object
+	sprites    map[SpriteName]*Sprite
+	stages     []Stage
+	stageIndex int
+
+	shouldDraw bool
+}
+
+func (game *Game) Update() error {
 	done := true
 
-	for i := range boxes {
-		boxes[i].Update()
+	for i := range game.boxes {
+		game.boxes[i].Update(game)
 
-		if !boxes[i].Done() {
+		if !game.boxes[i].Done(game) {
 			done = false
 		}
 	}
 
-	if player != nil {
-		player.Update()
+	if game.player != nil {
+		game.player.Update(game)
 	}
 
 	if done {
-		nextStage()
+		game.nextStage()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageUp) {
-		nextStage()
+		game.nextStage()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
-		prevStage()
+		game.prevStage()
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF5) {
-		startStage()
+		game.startStage()
 	}
 
 	return nil
@@ -56,55 +69,67 @@ const (
 	stageY = 26
 )
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	if !shouldDraw {
+func (game *Game) Draw(screen *ebiten.Image) {
+	if !game.shouldDraw {
 		ebitenutil.DrawLine(screen, 0, 0, -1, -1, color.Black)
 
 		return
 	}
 
-	for i := range objects {
-		objects[i].Draw(screen)
+	for i := range game.objects {
+		game.objects[i].Draw(game, screen)
 	}
 
-	for i := range boxes {
-		boxes[i].Draw(screen)
+	for i := range game.boxes {
+		game.boxes[i].Draw(game, screen)
 	}
 
 	steps := 0
 
-	if player != nil {
-		player.Draw(screen)
-		steps = len(player.history)
+	if game.player != nil {
+		game.player.Draw(game, screen)
+		steps = len(game.player.history)
 	}
 
 	// HUD
-	DrawText(screen, stepX, stepY, fmt.Sprintf("STEP %d", steps))
-	DrawText(screen, stageX, stageY, fmt.Sprintf("STAGE %s", stages[stageIndex].Name))
+	game.DrawText(screen, stepX, stepY, fmt.Sprintf("STEP %d", steps))
+	game.DrawText(screen, stageX, stageY, fmt.Sprintf("STAGE %s", game.stages[game.stageIndex].Name))
 
-	shouldDraw = false
+	game.shouldDraw = false
 }
 
-func (g *Game) Layout(int, int) (int, int) {
+func (game *Game) Layout(int, int) (int, int) {
 	return screenWidth * scaleFactor, screenHeight * scaleFactor
 }
 
 func New(assets embed.FS) (*Game, error) {
-	game1 := Game{}
+	game := Game{
+		fontImage:    nil,
+		playerImage:  nil,
+		tileSetImage: nil,
+		fontCache:    make(map[int32]*ebiten.Image),
+		player:       nil,
+		boxes:        nil,
+		objects:      nil,
+		sprites:      nil,
+		stages:       nil,
+		stageIndex:   0,
+		shouldDraw:   false,
+	}
 
-	err := loadImages(assets)
+	err := game.loadImages(assets)
 	if err != nil {
 		return nil, errors.Wrap(err, "error on load Images")
 	}
 
-	loadSprites()
+	game.loadSprites()
 
-	err = loadStages(assets, "assets/stages")
+	err = game.loadStages(assets, "assets/stages")
 	if err != nil {
 		return nil, errors.Wrap(err, "error on load stages")
 	}
 
-	startStage()
+	game.startStage()
 
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowTitle("Shove It")
@@ -113,5 +138,5 @@ func New(assets embed.FS) (*Game, error) {
 	ebiten.SetScreenClearedEveryFrame(false)
 	ebiten.SetScreenTransparent(false)
 
-	return &game1, nil
+	return &game, nil
 }

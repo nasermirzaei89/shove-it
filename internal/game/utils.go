@@ -74,38 +74,23 @@ const (
 	SpriteBoxDone5 SpriteName = "box-done5"
 )
 
-var (
-	player     *Player
-	boxes      []*Box
-	objects    []*Object
-	sprites    map[SpriteName]*Sprite
-	stages     []Stage
-	stageIndex = 0
-)
-
-var (
-	fontImage    *ebiten.Image
-	playerImage  *ebiten.Image
-	tileSetImage *ebiten.Image
-)
-
-func Scale() float64 {
-	scaleX := float64(scaleFactor*defaultSizeX) / float64(stages[stageIndex].TMX.Width)
-	scaleY := float64(scaleFactor*defaultSizeY) / float64(stages[stageIndex].TMX.Height)
+func (game *Game) scale() float64 {
+	scaleX := float64(scaleFactor*defaultSizeX) / float64(game.stages[game.stageIndex].TMX.Width)
+	scaleY := float64(scaleFactor*defaultSizeY) / float64(game.stages[game.stageIndex].TMX.Height)
 
 	return math.Min(scaleX, scaleY)
 }
 
-func createObjectAt(spriteName SpriteName, i, j int) {
-	objects = append(objects, &Object{
+func (game *Game) createObjectAt(spriteName SpriteName, i, j int) {
+	game.objects = append(game.objects, &object{
 		Sprite:    spriteName,
 		PositionX: float64(i * tileWidth),
 		PositionY: float64(j * tileWidth),
 	})
 }
 
-func createPlayerAt(i, j int) {
-	player = &Player{
+func (game *Game) createPlayerAt(i, j int) {
+	game.player = &Player{
 		PositionX:     float64(i * tileWidth),
 		PositionY:     float64(j * tileWidth),
 		I:             i,
@@ -120,8 +105,8 @@ func createPlayerAt(i, j int) {
 	}
 }
 
-func createBoxAt(spriteName SpriteName, i, j int) {
-	boxes = append(boxes, &Box{
+func (game *Game) createBoxAt(spriteName SpriteName, i, j int) {
+	game.boxes = append(game.boxes, &Box{
 		PositionX:  float64(i * tileWidth),
 		PositionY:  float64(j * tileWidth),
 		I:          i,
@@ -144,7 +129,7 @@ func loadImage(assets embed.FS, filename string) (*ebiten.Image, error) {
 	return img, nil
 }
 
-func loadStages(assets embed.FS, dir string) error {
+func (game *Game) loadStages(assets embed.FS, dir string) error {
 	entries, err := assets.ReadDir(dir)
 	if err != nil {
 		return errors.Wrap(err, "error on read directory")
@@ -207,33 +192,33 @@ func loadStages(assets embed.FS, dir string) error {
 		return a < b
 	})
 
-	stages = res
+	game.stages = res
 
 	return nil
 }
 
-func nextStage() {
-	stageIndex++
+func (game *Game) nextStage() {
+	game.stageIndex++
 
-	if stageIndex == len(stages) {
-		stageIndex = 0
+	if game.stageIndex == len(game.stages) {
+		game.stageIndex = 0
 	}
 
-	startStage()
+	game.startStage()
 }
 
-func prevStage() {
-	stageIndex--
+func (game *Game) prevStage() {
+	game.stageIndex--
 
-	if stageIndex < 0 {
-		stageIndex = len(stages) - 1
+	if game.stageIndex < 0 {
+		game.stageIndex = len(game.stages) - 1
 	}
 
-	startStage()
+	game.startStage()
 }
 
-func getThemes() (tileTheme, flagTheme SpriteName) {
-	data := stages[stageIndex].Data
+func (game *Game) getThemes() (tileTheme, flagTheme SpriteName) {
+	data := game.stages[game.stageIndex].Data
 
 	for j := range data {
 		for i := range data[j] {
@@ -260,89 +245,89 @@ func getThemes() (tileTheme, flagTheme SpriteName) {
 	return
 }
 
-func startStage() {
-	data := stages[stageIndex].Data
+func (game *Game) startStage() {
+	data := game.stages[game.stageIndex].Data
 
-	objects = make([]*Object, 0)
-	boxes = make([]*Box, 0)
+	game.objects = make([]*object, 0)
+	game.boxes = make([]*Box, 0)
 
-	tileTheme, flagTheme := getThemes()
+	tileTheme, flagTheme := game.getThemes()
 
 	for j := range data {
 		for i := range data[j] {
 			switch data[j][i] {
 			case ItemBackground1:
-				createObjectAt(SpriteBackground1, i, j)
+				game.createObjectAt(SpriteBackground1, i, j)
 			case ItemBackground2:
-				createObjectAt(SpriteBackground2, i, j)
+				game.createObjectAt(SpriteBackground2, i, j)
 			case ItemBackground3:
-				createObjectAt(SpriteBackground3, i, j)
+				game.createObjectAt(SpriteBackground3, i, j)
 			case ItemBackground4:
-				createObjectAt(SpriteBackground4, i, j)
+				game.createObjectAt(SpriteBackground4, i, j)
 			case ItemBackground5:
-				createObjectAt(SpriteBackground5, i, j)
+				game.createObjectAt(SpriteBackground5, i, j)
 			case ItemWall1:
-				createObjectAt(SpriteWall1, i, j)
+				game.createObjectAt(SpriteWall1, i, j)
 			case ItemWall2:
-				createObjectAt(SpriteWall2, i, j)
+				game.createObjectAt(SpriteWall2, i, j)
 			case ItemWall3:
-				createObjectAt(SpriteWall3, i, j)
+				game.createObjectAt(SpriteWall3, i, j)
 			case ItemWall4:
-				createObjectAt(SpriteWall4, i, j)
+				game.createObjectAt(SpriteWall4, i, j)
 			case ItemTile1:
-				createObjectAt(SpriteTile1, i, j)
+				game.createObjectAt(SpriteTile1, i, j)
 			case ItemTile2:
-				createObjectAt(SpriteTile2, i, j)
+				game.createObjectAt(SpriteTile2, i, j)
 			case ItemTile3:
-				createObjectAt(SpriteTile3, i, j)
+				game.createObjectAt(SpriteTile3, i, j)
 			case ItemTileFlagged1:
-				createObjectAt(SpriteFlag1, i, j)
+				game.createObjectAt(SpriteFlag1, i, j)
 			case ItemTileFlagged2:
-				createObjectAt(SpriteFlag2, i, j)
+				game.createObjectAt(SpriteFlag2, i, j)
 			case ItemTileFlagged3:
-				createObjectAt(SpriteFlag3, i, j)
+				game.createObjectAt(SpriteFlag3, i, j)
 			case ItemPlayer1:
-				createObjectAt(SpriteTile1, i, j)
-				createPlayerAt(i, j)
+				game.createObjectAt(SpriteTile1, i, j)
+				game.createPlayerAt(i, j)
 			case ItemPlayer2:
-				createObjectAt(SpriteTile2, i, j)
-				createPlayerAt(i, j)
+				game.createObjectAt(SpriteTile2, i, j)
+				game.createPlayerAt(i, j)
 			case ItemPlayer3:
-				createObjectAt(SpriteTile3, i, j)
-				createPlayerAt(i, j)
+				game.createObjectAt(SpriteTile3, i, j)
+				game.createPlayerAt(i, j)
 			case ItemBox1:
-				createObjectAt(tileTheme, i, j)
-				createBoxAt(SpriteBox1, i, j)
+				game.createObjectAt(tileTheme, i, j)
+				game.createBoxAt(SpriteBox1, i, j)
 			case ItemBox2:
-				createObjectAt(tileTheme, i, j)
-				createBoxAt(SpriteBox2, i, j)
+				game.createObjectAt(tileTheme, i, j)
+				game.createBoxAt(SpriteBox2, i, j)
 			case ItemBox3:
-				createObjectAt(tileTheme, i, j)
-				createBoxAt(SpriteBox3, i, j)
+				game.createObjectAt(tileTheme, i, j)
+				game.createBoxAt(SpriteBox3, i, j)
 			case ItemBox4:
-				createObjectAt(tileTheme, i, j)
-				createBoxAt(SpriteBox4, i, j)
+				game.createObjectAt(tileTheme, i, j)
+				game.createBoxAt(SpriteBox4, i, j)
 			case ItemBox5:
-				createObjectAt(tileTheme, i, j)
-				createBoxAt(SpriteBox5, i, j)
+				game.createObjectAt(tileTheme, i, j)
+				game.createBoxAt(SpriteBox5, i, j)
 			case ItemBoxDone1:
-				createObjectAt(flagTheme, i, j)
-				createBoxAt(SpriteBox1, i, j)
+				game.createObjectAt(flagTheme, i, j)
+				game.createBoxAt(SpriteBox1, i, j)
 			case ItemBoxDone2:
-				createObjectAt(flagTheme, i, j)
-				createBoxAt(SpriteBox2, i, j)
+				game.createObjectAt(flagTheme, i, j)
+				game.createBoxAt(SpriteBox2, i, j)
 			case ItemBoxDone3:
-				createObjectAt(flagTheme, i, j)
-				createBoxAt(SpriteBox3, i, j)
+				game.createObjectAt(flagTheme, i, j)
+				game.createBoxAt(SpriteBox3, i, j)
 			case ItemBoxDone4:
-				createObjectAt(flagTheme, i, j)
-				createBoxAt(SpriteBox4, i, j)
+				game.createObjectAt(flagTheme, i, j)
+				game.createBoxAt(SpriteBox4, i, j)
 			case ItemBoxDone5:
-				createObjectAt(flagTheme, i, j)
-				createBoxAt(SpriteBox5, i, j)
+				game.createObjectAt(flagTheme, i, j)
+				game.createBoxAt(SpriteBox5, i, j)
 			}
 		}
 	}
 
-	shouldDraw = true
+	game.shouldDraw = true
 }

@@ -4,12 +4,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Object struct {
+type object struct {
 	Sprite               SpriteName
 	PositionX, PositionY float64
 }
 
-func (obj *Object) Draw(screen *ebiten.Image) {
+func (obj *object) Draw(game *Game, screen *ebiten.Image) {
 	opts := ebiten.DrawImageOptions{
 		GeoM:          ebiten.GeoM{},
 		ColorM:        ebiten.ColorM{},
@@ -17,9 +17,11 @@ func (obj *Object) Draw(screen *ebiten.Image) {
 		Filter:        0,
 	}
 
-	opts.GeoM.Scale(Scale(), Scale())
+	scale := game.scale()
 
-	opts.GeoM.Translate(obj.PositionX*Scale(), obj.PositionY*Scale())
+	opts.GeoM.Scale(scale, scale)
 
-	screen.DrawImage(sprites[obj.Sprite].Images[0], &opts)
+	opts.GeoM.Translate(obj.PositionX*scale, obj.PositionY*scale)
+
+	screen.DrawImage(game.sprites[obj.Sprite].Images[0], &opts)
 }

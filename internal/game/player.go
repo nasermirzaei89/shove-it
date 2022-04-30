@@ -42,75 +42,75 @@ func (p *Player) SetCurrentSprite(sprite SpriteName) {
 	}
 }
 
-func (p *Player) IsWallAtLeft() bool {
-	return stages[stageIndex].IsWall(p.I-1, p.J)
+func (p *Player) IsWallAtLeft(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(p.I-1, p.J)
 }
 
-func (p *Player) IsWallAtRight() bool {
-	return stages[stageIndex].IsWall(p.I+1, p.J)
+func (p *Player) IsWallAtRight(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(p.I+1, p.J)
 }
 
-func (p *Player) IsWallAtTop() bool {
-	return stages[stageIndex].IsWall(p.I, p.J-1)
+func (p *Player) IsWallAtTop(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(p.I, p.J-1)
 }
 
-func (p *Player) IsWallAtBottom() bool {
-	return stages[stageIndex].IsWall(p.I, p.J+1)
+func (p *Player) IsWallAtBottom(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(p.I, p.J+1)
 }
 
-func (p *Player) BoxAtLeft() *Box {
-	for i := range boxes {
-		if boxes[i].I == p.I-1 && boxes[i].J == p.J {
-			return boxes[i]
+func (p *Player) BoxAtLeft(game *Game) *Box {
+	for i := range game.boxes {
+		if game.boxes[i].I == p.I-1 && game.boxes[i].J == p.J {
+			return game.boxes[i]
 		}
 	}
 
 	return nil
 }
 
-func (p *Player) BoxAtRight() *Box {
-	for i := range boxes {
-		if boxes[i].I == p.I+1 && boxes[i].J == p.J {
-			return boxes[i]
+func (p *Player) BoxAtRight(game *Game) *Box {
+	for i := range game.boxes {
+		if game.boxes[i].I == p.I+1 && game.boxes[i].J == p.J {
+			return game.boxes[i]
 		}
 	}
 
 	return nil
 }
 
-func (p *Player) BoxAtTop() *Box {
-	for i := range boxes {
-		if boxes[i].I == p.I && boxes[i].J == p.J-1 {
-			return boxes[i]
+func (p *Player) BoxAtTop(game *Game) *Box {
+	for i := range game.boxes {
+		if game.boxes[i].I == p.I && game.boxes[i].J == p.J-1 {
+			return game.boxes[i]
 		}
 	}
 
 	return nil
 }
 
-func (p *Player) BoxAtBottom() *Box {
-	for i := range boxes {
-		if boxes[i].I == p.I && boxes[i].J == p.J+1 {
-			return boxes[i]
+func (p *Player) BoxAtBottom(game *Game) *Box {
+	for i := range game.boxes {
+		if game.boxes[i].I == p.I && game.boxes[i].J == p.J+1 {
+			return game.boxes[i]
 		}
 	}
 
 	return nil
 }
 
-func (p *Player) checkLeft() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || p.IsWallAtLeft() {
+func (p *Player) checkLeft(game *Game) {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyLeft) || p.IsWallAtLeft(game) {
 		return
 	}
 
 	pushing := false
 
-	if box := p.BoxAtLeft(); box != nil {
-		if box.IsWallAtLeft() {
+	if box := p.BoxAtLeft(game); box != nil {
+		if box.IsWallAtLeft(game) {
 			return
 		}
 
-		if box.IsBoxAtLeft() {
+		if box.IsBoxAtLeft(game) {
 			return
 		}
 
@@ -132,19 +132,19 @@ func (p *Player) checkLeft() {
 	}
 }
 
-func (p *Player) checkRight() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || p.IsWallAtRight() {
+func (p *Player) checkRight(game *Game) {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyRight) || p.IsWallAtRight(game) {
 		return
 	}
 
 	pushing := false
 
-	if box := p.BoxAtRight(); box != nil {
-		if box.IsWallAtRight() {
+	if box := p.BoxAtRight(game); box != nil {
+		if box.IsWallAtRight(game) {
 			return
 		}
 
-		if box.IsBoxAtRight() {
+		if box.IsBoxAtRight(game) {
 			return
 		}
 
@@ -166,19 +166,19 @@ func (p *Player) checkRight() {
 	}
 }
 
-func (p *Player) checkUp() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || p.IsWallAtTop() {
+func (p *Player) checkUp(game *Game) {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyUp) || p.IsWallAtTop(game) {
 		return
 	}
 
 	pushing := false
 
-	if box := p.BoxAtTop(); box != nil {
-		if box.IsWallAtTop() {
+	if box := p.BoxAtTop(game); box != nil {
+		if box.IsWallAtTop(game) {
 			return
 		}
 
-		if box.IsBoxAtTop() {
+		if box.IsBoxAtTop(game) {
 			return
 		}
 
@@ -200,19 +200,19 @@ func (p *Player) checkUp() {
 	}
 }
 
-func (p *Player) checkDown() {
-	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || p.IsWallAtBottom() {
+func (p *Player) checkDown(game *Game) {
+	if !p.idle || !ebiten.IsKeyPressed(ebiten.KeyDown) || p.IsWallAtBottom(game) {
 		return
 	}
 
 	pushing := false
 
-	if box := p.BoxAtBottom(); box != nil {
-		if box.IsWallAtBottom() {
+	if box := p.BoxAtBottom(game); box != nil {
+		if box.IsWallAtBottom(game) {
 			return
 		}
 
-		if box.IsBoxAtBottom() {
+		if box.IsBoxAtBottom(game) {
 			return
 		}
 
@@ -284,11 +284,11 @@ func (p *Player) checkUndo() {
 	p.boxHistory = p.boxHistory[:len(p.boxHistory)-1]
 }
 
-func (p *Player) Update() {
-	p.checkLeft()
-	p.checkRight()
-	p.checkUp()
-	p.checkDown()
+func (p *Player) Update(game *Game) {
+	p.checkLeft(game)
+	p.checkRight(game)
+	p.checkUp(game)
+	p.checkDown(game)
 	p.checkUndo()
 
 	if p.DesiredX() != p.PositionX {
@@ -298,7 +298,7 @@ func (p *Player) Update() {
 			p.PositionX += movementSpeed
 		}
 
-		shouldDraw = true
+		game.shouldDraw = true
 	}
 
 	if p.DesiredY() != p.PositionY {
@@ -308,17 +308,17 @@ func (p *Player) Update() {
 			p.PositionY += movementSpeed
 		}
 
-		shouldDraw = true
+		game.shouldDraw = true
 	}
 
 	if !p.idle && p.PositionX == p.DesiredX() && p.PositionY == p.DesiredY() {
 		p.idle = true
 
-		shouldDraw = true
+		game.shouldDraw = true
 	}
 }
 
-func (p *Player) Draw(screen *ebiten.Image) {
+func (p *Player) Draw(game *Game, screen *ebiten.Image) {
 	opts := ebiten.DrawImageOptions{
 		GeoM:          ebiten.GeoM{},
 		ColorM:        ebiten.ColorM{},
@@ -330,9 +330,11 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	opts.GeoM.Rotate(p.direction)
 	opts.GeoM.Translate(tileWidth/2, tileWidth/2)
 
-	opts.GeoM.Scale(Scale(), Scale())
+	scale := game.scale()
 
-	opts.GeoM.Translate(p.PositionX*Scale(), p.PositionY*Scale())
+	opts.GeoM.Scale(scale, scale)
+
+	opts.GeoM.Translate(p.PositionX*scale, p.PositionY*scale)
 
 	switch {
 	case p.idle && !p.pushing:
@@ -345,7 +347,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 		p.SetCurrentSprite(SpritePushing)
 	}
 
-	sprite := sprites[p.currentSprite]
+	sprite := game.sprites[p.currentSprite]
 
 	p.animation += 1.0 / fps
 

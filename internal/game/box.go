@@ -20,7 +20,7 @@ func (box Box) DesiredY() float64 {
 	return float64(box.J * tileWidth)
 }
 
-func (box *Box) Update() {
+func (box *Box) Update(game *Game) {
 	if box.DesiredX() != box.PositionX {
 		if math.Signbit(box.DesiredX() - box.PositionX) {
 			box.PositionX -= movementSpeed
@@ -28,7 +28,7 @@ func (box *Box) Update() {
 			box.PositionX += movementSpeed
 		}
 
-		shouldDraw = true
+		game.shouldDraw = true
 	}
 
 	if box.DesiredY() != box.PositionY {
@@ -38,11 +38,11 @@ func (box *Box) Update() {
 			box.PositionY += movementSpeed
 		}
 
-		shouldDraw = true
+		game.shouldDraw = true
 	}
 }
 
-func (box *Box) Draw(screen *ebiten.Image) {
+func (box *Box) Draw(game *Game, screen *ebiten.Image) {
 	opts := ebiten.DrawImageOptions{
 		GeoM:          ebiten.GeoM{},
 		ColorM:        ebiten.ColorM{},
@@ -50,13 +50,15 @@ func (box *Box) Draw(screen *ebiten.Image) {
 		Filter:        0,
 	}
 
-	opts.GeoM.Scale(Scale(), Scale())
+	scale := game.scale()
 
-	opts.GeoM.Translate(box.PositionX*Scale(), box.PositionY*Scale())
+	opts.GeoM.Scale(scale, scale)
+
+	opts.GeoM.Translate(box.PositionX*scale, box.PositionY*scale)
 
 	currentSprite := box.SpriteName
 
-	if box.Done() {
+	if box.Done(game) {
 		switch {
 		case box.SpriteName == SpriteBox1:
 			currentSprite = SpriteBoxDone1
@@ -71,32 +73,32 @@ func (box *Box) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	screen.DrawImage(sprites[currentSprite].Images[0], &opts)
+	screen.DrawImage(game.sprites[currentSprite].Images[0], &opts)
 }
 
-func (box *Box) Done() bool {
-	return stages[stageIndex].IsFlag(box.I, box.J) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
+func (box *Box) Done(game *Game) bool {
+	return game.stages[game.stageIndex].IsFlag(box.I, box.J) && box.DesiredX() == box.PositionX && box.DesiredY() == box.PositionY
 }
 
-func (box *Box) IsWallAtLeft() bool {
-	return stages[stageIndex].IsWall(box.I-1, box.J)
+func (box *Box) IsWallAtLeft(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(box.I-1, box.J)
 }
 
-func (box *Box) IsWallAtRight() bool {
-	return stages[stageIndex].IsWall(box.I+1, box.J)
+func (box *Box) IsWallAtRight(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(box.I+1, box.J)
 }
 
-func (box *Box) IsWallAtTop() bool {
-	return stages[stageIndex].IsWall(box.I, box.J-1)
+func (box *Box) IsWallAtTop(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(box.I, box.J-1)
 }
 
-func (box *Box) IsWallAtBottom() bool {
-	return stages[stageIndex].IsWall(box.I, box.J+1)
+func (box *Box) IsWallAtBottom(game *Game) bool {
+	return game.stages[game.stageIndex].IsWall(box.I, box.J+1)
 }
 
-func (box *Box) IsBoxAtLeft() bool {
-	for j := range boxes {
-		if boxes[j].I == box.I-1 && boxes[j].J == box.J {
+func (box *Box) IsBoxAtLeft(game *Game) bool {
+	for j := range game.boxes {
+		if game.boxes[j].I == box.I-1 && game.boxes[j].J == box.J {
 			return true
 		}
 	}
@@ -104,9 +106,9 @@ func (box *Box) IsBoxAtLeft() bool {
 	return false
 }
 
-func (box *Box) IsBoxAtRight() bool {
-	for j := range boxes {
-		if boxes[j].I == box.I+1 && boxes[j].J == box.J {
+func (box *Box) IsBoxAtRight(game *Game) bool {
+	for j := range game.boxes {
+		if game.boxes[j].I == box.I+1 && game.boxes[j].J == box.J {
 			return true
 		}
 	}
@@ -114,9 +116,9 @@ func (box *Box) IsBoxAtRight() bool {
 	return false
 }
 
-func (box *Box) IsBoxAtTop() bool {
-	for j := range boxes {
-		if boxes[j].I == box.I && boxes[j].J == box.J-1 {
+func (box *Box) IsBoxAtTop(game *Game) bool {
+	for j := range game.boxes {
+		if game.boxes[j].I == box.I && game.boxes[j].J == box.J-1 {
 			return true
 		}
 	}
@@ -124,9 +126,9 @@ func (box *Box) IsBoxAtTop() bool {
 	return false
 }
 
-func (box *Box) IsBoxAtBottom() bool {
-	for j := range boxes {
-		if boxes[j].I == box.I && boxes[j].J == box.J+1 {
+func (box *Box) IsBoxAtBottom(game *Game) bool {
+	for j := range game.boxes {
+		if game.boxes[j].I == box.I && game.boxes[j].J == box.J+1 {
 			return true
 		}
 	}
